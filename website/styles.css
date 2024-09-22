@@ -1,0 +1,35 @@
+body {
+    font-family: Arial, sans-serif;
+    margin: 20px;
+}
+
+footer {
+    margin-top: 40px;
+}
+
+footer h2 {
+    margin-bottom: 10px;
+}
+
+.references {
+    list-style-type: decimal;
+    margin-left: 20px;
+}
+
+.references li {
+    margin-bottom: 15px;
+    text-align: justify;
+}
+
+.references li em {
+    font-style: italic;
+}
+
+.references a {
+    color: blue;
+    text-decoration: none;
+}
+
+.references a:hover {
+    text-decoration: underline;
+}
