@@ -18,16 +18,29 @@
             <li><a href="#source">Source Code</a></li>
         </ul>
     </nav>
+
     <main>
         <section>
-            <form action="">
+            <form id="rectangleForm">
+                <label for="width">Width:</label>
+                <input type="number" id="width" name="width" required>
+                <label for="height">Height:</label>
+                <input type="number" id="height" name="height" required>
+                <label for="quantity">Quantity:</label>
+                <input type="number" id="quantity" name="quantity" required>
+                <button type="button" onclick="addRectangle()">Add Rectangle</button>
+                <button type="button" onclick="loadJSON()">Load JSON File</button>
+                <button type="button" onclick="calculateTotalArea()">Calculate Total Area</button>
+                <input type="file" id="fileInput" hidden>
             </form>
+        </section>
+        <section id="rectangleList">
+            <!-- Rectangle list will be dynamically inserted here -->
         </section>
         <section>
             <h2>About:</h2>
-            <p id="about">The Cutting Stock Problem is a combinatorial optimization problem that involves cutting large sheets of material into smaller pieces in order to minimize waste. This problem is commonly encountered in the manufacturing industry, where companies need to cut raw materials such as wood, metal, or fabric into smaller pieces to meet customer demand. The goal of the Cutting Stock Problem is to find the most efficient way to cut the raw material so that the waste is minimized and the demand is met. This website provides a simple calculator that allows users to input the dimensions of the raw material and the desired sizes of the smaller pieces, and then calculates the optimal cutting pattern to minimize waste.</p>
+            <p id="about">The Cutting Stock Problem is a combinatorial optimization problem that involves cutting large sheets of material into smaller pieces in order to minimize waste...</p>
         </section>
-
     </main>
     <footer>
         <section>

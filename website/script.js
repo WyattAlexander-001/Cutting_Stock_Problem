@@ -1,3 +1,93 @@
+//-----------------------------------
+
+// UI ELEMENTS
+
+//-----------------------------------
+
+
+let rectangles = [];
+
+function addRectangle() {
+    const width = document.getElementById('width').value;
+    const height = document.getElementById('height').value;
+    const quantity = parseInt(document.getElementById('quantity').value);
+    for (let i = 0; i < quantity; i++) {
+        rectangles.push({ width: parseInt(width), height: parseInt(height) });
+    }
+    updateRectangleList();
+}
+
+function updateRectangleList() {
+    const list = document.getElementById('rectangleList');
+    list.innerHTML = ''; // Clear existing list
+    rectangles.forEach((rect, index) => {
+        const rectElement = document.createElement('div');
+        rectElement.textContent = `Width: ${rect.width}, Height: ${rect.height}`;
+        const deleteButton = document.createElement('button');
+        deleteButton.textContent = 'Delete';
+        deleteButton.onclick = () => {
+            rectangles.splice(index, 1);
+            updateRectangleList();
+        };
+        rectElement.appendChild(deleteButton);
+        list.appendChild(rectElement);
+    });
+}
+
+function loadJSON() {
+    const fileInput = document.getElementById('fileInput');
+    fileInput.click();
+    fileInput.onchange = e => {
+        const fileReader = new FileReader();
+        fileReader.onload = event => {
+            rectangles = JSON.parse(event.target.result);
+            updateRectangleList();
+        };
+        fileReader.readAsText(e.target.files[0]);
+    };
+}
+
+function calculateTotalArea() {
+    const totalAreaValue = totalArea(rectangles); 
+    console.log('Total Area:', totalAreaValue);
+}
+
+
+document.getElementById('rectangleForm').onsubmit = e => e.preventDefault(); // Prevent form from submitting
+
+document.getElementById('width').addEventListener('keypress', function(event) {
+    if (event.key === 'Enter') {
+        event.preventDefault(); // Prevent the default form submission
+        addRectangle();
+    }
+});
+
+document.getElementById('height').addEventListener('keypress', function(event) {
+    if (event.key === 'Enter') {
+        event.preventDefault(); // Prevent the default form submission
+        addRectangle();
+    }
+});
+
+document.getElementById('quantity').addEventListener('keypress', function(event) {
+    if (event.key === 'Enter') {
+        event.preventDefault(); // Prevent the default form submission
+        addRectangle();
+    }
+});
+
+
+
+
+//-----------------------------------
+
+// HELPERS
+
+//-----------------------------------
+
+
+
+
 // Function to calculate the area of a rectangle
 function area(rectangle) {
     return rectangle.width * rectangle.height;
