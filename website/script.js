@@ -34,6 +34,12 @@ function updateRectangleList() {
     });
 }
 
+function clearAllRectangles() {
+    rectangles = []; // Clear the internal state array
+    updateRectangleList(); // Update the UI to reflect the empty list
+}
+
+
 function loadJSON() {
     const fileInput = document.getElementById('fileInput');
     fileInput.click();
@@ -75,6 +81,16 @@ document.getElementById('quantity').addEventListener('keypress', function(event)
         addRectangle();
     }
 });
+
+document.addEventListener('DOMContentLoaded', function() {
+    document.getElementById('rectangleForm').addEventListener('keypress', function(event) {
+        if (event.key === 'Enter') {
+            event.preventDefault(); // Prevent the default form submission
+            addRectangle();
+        }
+    });
+});
+
 
 
 
