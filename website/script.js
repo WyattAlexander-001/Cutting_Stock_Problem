@@ -61,35 +61,18 @@ function calculateTotalArea() {
 
 document.getElementById('rectangleForm').onsubmit = e => e.preventDefault(); // Prevent form from submitting
 
-document.getElementById('width').addEventListener('keypress', function(event) {
-    if (event.key === 'Enter') {
-        event.preventDefault(); // Prevent the default form submission
-        addRectangle();
-    }
-});
-
-document.getElementById('height').addEventListener('keypress', function(event) {
-    if (event.key === 'Enter') {
-        event.preventDefault(); // Prevent the default form submission
-        addRectangle();
-    }
-});
-
-document.getElementById('quantity').addEventListener('keypress', function(event) {
-    if (event.key === 'Enter') {
-        event.preventDefault(); // Prevent the default form submission
-        addRectangle();
-    }
-});
-
 document.addEventListener('DOMContentLoaded', function() {
-    document.getElementById('rectangleForm').addEventListener('keypress', function(event) {
-        if (event.key === 'Enter') {
-            event.preventDefault(); // Prevent the default form submission
-            addRectangle();
-        }
+    // Listen for keypress events on the width, height, and quantity inputs specifically
+    ['width', 'height', 'quantity'].forEach(id => {
+        document.getElementById(id).addEventListener('keypress', function(event) {
+            if (event.key === 'Enter') {
+                event.preventDefault(); // Prevent the default form submission
+                addRectangle();  // Call to add a rectangle when Enter is pressed
+            }
+        });
     });
 });
+
 
 
 
