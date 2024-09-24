@@ -14,25 +14,125 @@ function addRectangle() {
     for (let i = 0; i < quantity; i++) {
         rectangles.push({ width: parseInt(width), height: parseInt(height) });
     }
+    showModal();
+}
+
+function showModal() {
+    const modal = document.getElementById('rectangleModal');
+    const modalList = document.getElementById('modalRectangleList');
+    modalList.innerHTML = ''; // Clear previous entries
+
+    // Group by width and height
+    const grouped = groupRectanglesBySize(rectangles);
+    Object.keys(grouped).forEach(size => {
+        const entry = document.createElement('div');
+        entry.classList.add('modal-entry');
+        const [width, height] = size.split('x');
+        entry.innerHTML = `
+            <span>[Width: ${width}, Height: ${height}] x ${grouped[size]}</span>
+            <button onclick="editEntry(${width}, ${height})">Edit</button>
+            <button onclick="removeEntry(${width}, ${height})">Delete</button>
+        `;
+        modalList.appendChild(entry);
+    });
+
+    modal.style.display = "block";
+}
+
+function editEntry(width, height) {
+    // This function prompts user to enter new quantity, similar to updateQuantity but with prompt
+    const newQuantity = prompt(`Enter new quantity for [Width: ${width}, Height: ${height}]:`, '');
+    if(newQuantity !== null) {
+        updateQuantity(width, height, parseInt(newQuantity));
+    }
+}
+
+function updateQuantity(width, height, newQuantity) {
+    // Filter out existing entries for this size
+    rectangles = rectangles.filter(rect => !(rect.width == width && rect.height == height));
+
+    // Add the new quantity of rectangles
+    for (let i = 0; i < newQuantity; i++) {
+        rectangles.push({ width: parseInt(width), height: parseInt(height) });
+    }
+    showModal(); // Refresh the modal to show updated quantities
+}
+
+function removeEntry(width, height) {
+    rectangles = rectangles.filter(rect => !(rect.width == width && rect.height == height));
+    showModal(); // Refresh the modal to show updated list
+}
+
+
+function confirmRectangles() {
+    const modal = document.getElementById('rectangleModal');
+    modal.style.display = "none";
+    updateRectangleList(); // Update the main list with grouped quantities
+}
+
+
+function groupRectanglesBySize(rectangles) {
+    const grouping = {};
+    rectangles.forEach(rect => {
+        const key = `${rect.width}x${rect.height}`;
+        if (grouping[key]) {
+            grouping[key]++;
+        } else {
+            grouping[key] = 1;
+        }
+    });
+    return grouping;
+}
+
+function confirmRectangles() {
+    const modal = document.getElementById('rectangleModal');
+    modal.style.display = "none";
     updateRectangleList();
+}
+
+// Close the modal when the user clicks on <span> (x)
+document.getElementsByClassName("close")[0].onclick = function() {
+    const modal = document.getElementById('rectangleModal');
+    modal.style.display = "none";
+}
+
+// Close the modal if the user clicks outside of it
+window.onclick = function(event) {
+    const modal = document.getElementById('rectangleModal');
+    if (event.target === modal) {
+        modal.style.display = "none";
+    }
 }
 
 function updateRectangleList() {
     const list = document.getElementById('rectangleList');
     list.innerHTML = ''; // Clear existing list
-    rectangles.forEach((rect, index) => {
-        const rectElement = document.createElement('div');
-        rectElement.textContent = `Width: ${rect.width}, Height: ${rect.height}`;
+
+    // Group rectangles by size
+    const grouped = groupRectanglesBySize(rectangles);
+    Object.keys(grouped).forEach(size => {
+        const entry = document.createElement('div');
+        const [width, height] = size.split('x');
+        const quantity = grouped[size];
+        entry.innerHTML = `<span>[Width: ${width}, Height: ${height}] x ${quantity}</span>`;
+        
+        // Create Edit button
+        const editButton = document.createElement('button');
+        editButton.textContent = 'Edit';
+        editButton.onclick = () => editEntry(width, height, quantity);
+        
+        // Create Delete button
         const deleteButton = document.createElement('button');
         deleteButton.textContent = 'Delete';
-        deleteButton.onclick = () => {
-            rectangles.splice(index, 1);
-            updateRectangleList();
-        };
-        rectElement.appendChild(deleteButton);
-        list.appendChild(rectElement);
+        deleteButton.onclick = () => removeEntry(width, height);
+
+        entry.appendChild(editButton);
+        entry.appendChild(deleteButton);
+
+        list.appendChild(entry);
     });
 }
+
 
 function clearAllRectangles() {
     rectangles = []; // Clear the internal state array
