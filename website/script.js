@@ -121,3 +121,43 @@ const exampleRectangles = [
 console.log("Total Area:", totalArea(exampleRectangles));
 console.log("Rotated to Landscape:", exampleRectangles.map(rotateToLandscape));
 
+
+//-----------------------------------
+
+// One-Dimensional Algo
+
+//-----------------------------------
+
+function performOneDCutting() {
+    const woodLengthsInput = document.getElementById('woodLengths').value;
+    const cutSize = parseFloat(document.getElementById('cutSize').value);
+    const bladeThicknessInches = parseFloat(document.getElementById('bladeThickness').value);
+    const bladeThickness = bladeThicknessInches / 12; // Convert inches to feet
+
+    // Convert the comma-separated string of lengths into an array of numbers
+    const woodLengths = woodLengthsInput.split(',').map(length => parseFloat(length.trim()));
+
+    // Perform the cutting operation
+    const results = oneDCutSorted(woodLengths, cutSize, bladeThickness);
+
+    // Display results
+    const resultsDiv = document.getElementById('cutResults');
+    resultsDiv.innerHTML = `Total Pieces: ${results.totalPieces}, Total Waste: ${results.waste.toFixed(2)} feet`;
+}
+
+function oneDCutSorted(lengths, targetLength, bladeThickness) {
+    lengths.sort((a, b) => b - a); // Sort in descending order
+    let totalPieces = 0;
+    let waste = 0;
+
+    lengths.forEach(length => {
+        while (length >= targetLength) {
+            length -= targetLength + bladeThickness;
+            totalPieces++;
+        }
+        waste += length;
+    });
+
+    return { totalPieces, totalPieces, waste };
+}
+
