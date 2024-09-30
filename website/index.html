@@ -25,14 +25,28 @@
             <form id="oneDCutForm">
                 <label for="woodLengths">Enter Wood Lengths (comma-separated, in feet):</label>
                 <input type="text" id="woodLengths" required>
-        
+            
                 <label for="cutSize">Desired Cut Size (feet):</label>
                 <input type="number" id="cutSize" step="0.01" required>
-        
+            
                 <label for="bladeThickness">Blade Thickness (inches):</label>
                 <input type="number" id="bladeThickness" value="0.125" step="0.01" required>
-                <button type="submit">Calculate Cuts</button>        
+            
+                <!-- Checkbox to specify desired number of pieces -->
+                <label>
+                    <input type="checkbox" id="specifyDesiredPieces">
+                    Specify Desired Number of Pieces
+                </label>
+            
+                <!-- Input field for desired number of pieces, initially hidden -->
+                <div id="desiredPiecesContainer" style="display: none;">
+                    <label for="desiredPieces">Desired Number of Pieces:</label>
+                    <input type="number" id="desiredPieces" min="1">
+                </div>
+            
+                <button type="submit">Calculate Cuts</button>
             </form>
+            
             <div id="cutResults"></div>
         </section>
         <section>

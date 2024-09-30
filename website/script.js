@@ -233,41 +233,78 @@ function performOneDCutting() {
     const bladeThicknessInches = parseFloat(document.getElementById('bladeThickness').value);
     const bladeThickness = bladeThicknessInches / 12; // Convert inches to feet
 
+    let desiredPieces = Infinity; // Default to cutting as many as possible
+
+    // Check if the user wants to specify the desired number of pieces
+    const specifyDesiredPieces = document.getElementById('specifyDesiredPieces').checked;
+    if (specifyDesiredPieces) {
+        const desiredPiecesInput = document.getElementById('desiredPieces').value;
+        desiredPieces = parseInt(desiredPiecesInput);
+        if (isNaN(desiredPieces) || desiredPieces <= 0) {
+            alert('Please enter a valid number of desired pieces.');
+            return; // Stop execution if invalid input
+        }
+    }
+
     // Convert the comma-separated string of lengths into an array of numbers
     let woodLengths = woodLengthsInput.split(',').map(length => parseFloat(length.trim()));
     woodLengths = woodLengths.filter(length => !isNaN(length) && length > 0); // Validate lengths
 
+    if (woodLengths.length === 0) {
+        alert('Please enter valid wood lengths.');
+        return; // Stop execution if no valid lengths
+    }
+
+    if (isNaN(cutSize) || cutSize <= 0) {
+        alert('Please enter a valid cut size.');
+        return; // Stop execution if invalid cut size
+    }
+
     // Perform the cutting operation
-    const results = oneDCutSorted(woodLengths, cutSize, bladeThickness);
+    const results = oneDCutSorted(woodLengths, cutSize, bladeThickness, desiredPieces);
 
     // Display results
     const resultsDiv = document.getElementById('cutResults');
     resultsDiv.innerHTML = `Total Pieces: ${results.totalPieces}, Total Waste: ${results.totalWaste.toFixed(2)} feet`;
 
+    if (specifyDesiredPieces && results.totalPieces < desiredPieces) {
+        resultsDiv.innerHTML += `<br>Note: Only ${results.totalPieces} pieces could be cut due to insufficient material.`;
+    }
+
     // Generate visualization
     generateOneDVisualization(results.cutDetails, cutSize, bladeThickness);
 }
 
-function oneDCutSorted(lengths, targetLength, bladeThickness) {
-    lengths.sort((a, b) => b - a); // Sort in descending order
+
+function oneDCutSorted(lengths, targetLength, bladeThickness, desiredPieces) {
+    lengths.sort((a, b) => b - a);
     let totalPieces = 0;
     let totalWaste = 0;
     const cutDetails = [];
+    const piecesNeeded = desiredPieces || Infinity;
 
-    lengths.forEach(length => {
+    for (let i = 0; i < lengths.length; i++) {
+        let length = lengths[i];
         const originalLength = length;
         const cuts = [];
-        while (length >= targetLength) {
+
+        while (length >= targetLength && totalPieces < piecesNeeded) {
             cuts.push(targetLength);
             length -= targetLength + bladeThickness;
             totalPieces++;
         }
+
         if (length > 0) {
             cuts.push(length); // Remaining waste
             totalWaste += length;
         }
+
         cutDetails.push({ originalLength: originalLength, cuts: cuts });
-    });
+
+        if (totalPieces >= piecesNeeded) {
+            break;
+        }
+    }
 
     return { totalPieces, totalWaste, cutDetails };
 }
@@ -315,6 +352,24 @@ function generateOneDVisualization(cutDetails, targetLength, bladeThickness) {
         container.appendChild(plankDiv);
     });
 }
+
+// Event listener to show/hide desiredPieces input field based on checkbox state
+document.addEventListener('DOMContentLoaded', function() {
+    const specifyDesiredPiecesCheckbox = document.getElementById('specifyDesiredPieces');
+    const desiredPiecesContainer = document.getElementById('desiredPiecesContainer');
+
+    specifyDesiredPiecesCheckbox.addEventListener('change', function() {
+        if (this.checked) {
+            desiredPiecesContainer.style.display = 'block';
+        } else {
+            desiredPiecesContainer.style.display = 'none';
+            // Clear the input value when hidden
+            document.getElementById('desiredPieces').value = '';
+        }
+    });
+});
+
+
 
 
 
