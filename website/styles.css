@@ -100,11 +100,11 @@ footer h2 {
 .plank {
     position: relative;
     width: 30px;
-    margin: 0 10px;
     background-color: #ccc;
     display: flex;
     flex-direction: column-reverse;
 }
+
 
 .usable-section {
     background-color: green;
@@ -121,5 +121,19 @@ footer h2 {
     background-color: black;
     width: 100%;
 }
+
+.plank-container {
+    display: inline-block;
+    margin: 0 10px;
+    text-align: center;
+}
+
+.length-label {
+    margin-top: 5px;
+    font-weight: bold;
+    font-size: 14px;
+    color: #333;
+}
+
 
 

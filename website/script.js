@@ -304,6 +304,10 @@ function generateOneDVisualization(cutDetails, targetLength, bladeThickness) {
     const maxLength = Math.max(...cutDetails.map(d => d.originalLength));
 
     cutDetails.forEach(detail => {
+        // Create a container for the plank and label
+        const plankContainer = document.createElement('div');
+        plankContainer.classList.add('plank-container');
+
         const plankDiv = document.createElement('div');
         plankDiv.classList.add('plank');
 
@@ -336,9 +340,24 @@ function generateOneDVisualization(cutDetails, targetLength, bladeThickness) {
             }
         });
 
-        container.appendChild(plankDiv);
+        // Append the plankDiv to the plankContainer
+        plankContainer.appendChild(plankDiv);
+
+        // Create a label for the plank length
+        const lengthLabel = document.createElement('div');
+        lengthLabel.classList.add('length-label');
+        lengthLabel.innerText = `${totalLength} ft`;
+
+        // Append the label to the plankContainer
+        plankContainer.appendChild(lengthLabel);
+
+        // Append the plankContainer to the main container
+        container.appendChild(plankContainer);
     });
 }
+
+
+
 function loadJSON1D() {
     const fileInput = document.getElementById('fileInput1D');
     fileInput.click();
