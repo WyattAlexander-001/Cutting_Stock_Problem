@@ -159,19 +159,6 @@ function calculateTotalArea() {
 }
 
 
-document.getElementById('rectangleForm').onsubmit = e => e.preventDefault(); // Prevent form from submitting
-
-// Event listener for 1D Cutting Stock Form
-document.getElementById('oneDCutForm').addEventListener('submit', function(event) {
-    event.preventDefault(); // Prevent the default form submission
-    performOneDCutting();   // Call your function
-});
-
-// Event listener for 2D Cutting Stock Form
-document.getElementById('rectangleForm').addEventListener('submit', function(event) {
-    event.preventDefault(); // Prevent the default form submission
-    addRectangle();         // Call your function
-});
 
 
 
@@ -352,6 +339,38 @@ function generateOneDVisualization(cutDetails, targetLength, bladeThickness) {
         container.appendChild(plankDiv);
     });
 }
+function loadJSON1D() {
+    const fileInput = document.getElementById('fileInput1D');
+    fileInput.click();
+    fileInput.onchange = e => {
+        const file = e.target.files[0];
+        if (!file) {
+            return;
+        }
+        const fileReader = new FileReader();
+        fileReader.onload = event => {
+            try {
+                const woodLengthsArray = JSON.parse(event.target.result);
+                if (Array.isArray(woodLengthsArray) && woodLengthsArray.every(item => typeof item === 'number')) {
+                    // Set the woodLengths input field value
+                    document.getElementById('woodLengths').value = woodLengthsArray.join(', ');
+                } else {
+                    alert('Invalid JSON format. Please provide an array of numbers.');
+                }
+            } catch (err) {
+                alert('Error parsing JSON file.');
+            }
+        };
+        fileReader.readAsText(file);
+    };
+}
+
+
+//-----------------------------------
+
+// Event Handlers/Listeners
+
+//-----------------------------------
 
 // Event listener to show/hide desiredPieces input field based on checkbox state
 document.addEventListener('DOMContentLoaded', function() {
@@ -368,6 +387,22 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     });
 });
+
+// Prevent form submission on Enter key press
+document.getElementById('rectangleForm').onsubmit = e => e.preventDefault(); // Prevent form from submitting
+
+// Event listener for 1D Cutting Stock Form
+document.getElementById('oneDCutForm').addEventListener('submit', function(event) {
+    event.preventDefault(); // Prevent the default form submission
+    performOneDCutting();   // Call your function
+});
+
+// Event listener for 2D Cutting Stock Form
+document.getElementById('rectangleForm').addEventListener('submit', function(event) {
+    event.preventDefault(); // Prevent the default form submission
+    addRectangle();         // Call your function
+});
+
 
 
 

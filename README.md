@@ -3,6 +3,7 @@
 
 Team No. 4
 Wyatt Bushman, Thomas Dalbavie, Michael Lindemann, Chris Nunez
+Project Name: Cuttinbg Stock Calculator
 Built by Peter LLC.
 Milestone 2
 
@@ -118,6 +119,22 @@ Issues will be tracked on GitHub issues
 [11] UnrealEngineHTML5, “GitHub - UnrealEngineHTML5/Documentation,” GitHub, 2019. https://github.com/UnrealEngineHTML5/Documentation (accessed Sep. 15, 2024). [Online]. Available:https://tinyurl.com/yutvrdm4
 
 [12] “HTML5 support ?,” Epic Developer Community Forums, May 21, 2023. https://forums.unrealengine.com/t/html5-support/1172997/2 (accessed Sep. 15, 2024).[Online]. Available:https://tinyurl.com/mr4826ha
+
+
+### Dev Log/Notes:
+
+Speed of sorting algorithm for 1D problem using 100,000 random inputs.
+
+Unsorted Speed: 2.4 seconds
+Sorted Speed: 0.4 seconds
+
+Factor of speed increase 2.4/0.4 = 6
+
+Percent increase = ((Factor - 1)/1) * 100 = 500% increase in speed
+
+Sorting speed increase is 525% increase
+
+![Speed Increase](website/README_images/SortingSpeedIncrease.png)
 
 ‌
 

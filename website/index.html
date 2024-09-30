@@ -8,7 +8,7 @@
 </head>
 <body>
     <header>
-        <h1>Welcome To The Cutting Stock Calculator! CSC!!!</h1>
+        <h1>Welcome To The Cutting Stock Calculator! CSC!!!!</h1>
         
     </header>
     <nav>
@@ -43,6 +43,8 @@
                     <label for="desiredPieces">Desired Number of Pieces:</label>
                     <input type="number" id="desiredPieces" min="1">
                 </div>
+                <button type="button" onclick="loadJSON1D()">Load JSON File</button>
+                <input type="file" id="fileInput1D" hidden>
             
                 <button type="submit">Calculate Cuts</button>
             </form>
