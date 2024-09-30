@@ -1,5 +1,5 @@
 body {
-    background-color: gold;
+    /* background-color: gold; */
     font-family: Arial, sans-serif;
     margin: 20px;
 }
@@ -87,6 +87,39 @@ footer h2 {
 
 .modal-entry button {
     margin-left: 10px;
+}
+
+/* 1-D Visual*/
+
+.visualization-container {
+    display: flex;
+    align-items: flex-end;
+    margin-top: 20px;
+}
+
+.plank {
+    position: relative;
+    width: 30px;
+    margin: 0 10px;
+    background-color: #ccc;
+    display: flex;
+    flex-direction: column-reverse;
+}
+
+.usable-section {
+    background-color: green;
+    width: 100%;
+}
+
+.waste-section {
+    background-color: red;
+    width: 100%;
+}
+
+.cut-line {
+    height: 2px;
+    background-color: black;
+    width: 100%;
 }
 
 

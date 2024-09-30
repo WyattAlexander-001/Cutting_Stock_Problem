@@ -235,29 +235,88 @@ function performOneDCutting() {
     const bladeThickness = bladeThicknessInches / 12; // Convert inches to feet
 
     // Convert the comma-separated string of lengths into an array of numbers
-    const woodLengths = woodLengthsInput.split(',').map(length => parseFloat(length.trim()));
+    let woodLengths = woodLengthsInput.split(',').map(length => parseFloat(length.trim()));
+    woodLengths = woodLengths.filter(length => !isNaN(length) && length > 0); // Validate lengths
 
     // Perform the cutting operation
     const results = oneDCutSorted(woodLengths, cutSize, bladeThickness);
 
     // Display results
     const resultsDiv = document.getElementById('cutResults');
-    resultsDiv.innerHTML = `Total Pieces: ${results.totalPieces}, Total Waste: ${results.waste.toFixed(2)} feet`;
+    resultsDiv.innerHTML = `Total Pieces: ${results.totalPieces}, Total Waste: ${results.totalWaste.toFixed(2)} feet`;
+
+    // Generate visualization
+    generateOneDVisualization(results.cutDetails, cutSize, bladeThickness);
 }
 
 function oneDCutSorted(lengths, targetLength, bladeThickness) {
     lengths.sort((a, b) => b - a); // Sort in descending order
     let totalPieces = 0;
-    let waste = 0;
+    let totalWaste = 0;
+    const cutDetails = [];
 
     lengths.forEach(length => {
+        const originalLength = length;
+        const cuts = [];
         while (length >= targetLength) {
+            cuts.push(targetLength);
             length -= targetLength + bladeThickness;
             totalPieces++;
         }
-        waste += length;
+        if (length > 0) {
+            cuts.push(length); // Remaining waste
+            totalWaste += length;
+        }
+        cutDetails.push({ originalLength: originalLength, cuts: cuts });
     });
 
-    return { totalPieces, totalPieces, waste };
+    return { totalPieces, totalWaste, cutDetails };
 }
+
+function generateOneDVisualization(cutDetails, targetLength, bladeThickness) {
+    const container = document.getElementById('oneDVisualization');
+    container.innerHTML = ''; // Clear previous visualization
+
+    // Calculate the maximum plank length for scaling
+    const maxLength = Math.max(...cutDetails.map(d => d.originalLength));
+
+    cutDetails.forEach(detail => {
+        const plankDiv = document.createElement('div');
+        plankDiv.classList.add('plank');
+
+        const totalLength = detail.originalLength;
+        const scaleFactor = 200 / maxLength; // Scale to 200px max height
+
+        // Set the height of the plankDiv
+        plankDiv.style.height = `${totalLength * scaleFactor}px`;
+
+        detail.cuts.forEach((cut, index) => {
+            const sectionDiv = document.createElement('div');
+            const heightPercentage = (cut / totalLength) * 100;
+
+            sectionDiv.style.height = `${heightPercentage}%`;
+
+            // Use tolerance in comparison
+            if (Math.abs(cut - targetLength) < 0.0001) {
+                sectionDiv.classList.add('usable-section');
+            } else {
+                sectionDiv.classList.add('waste-section');
+            }
+
+            plankDiv.appendChild(sectionDiv);
+
+            if (index < detail.cuts.length - 1) {
+                // Add a cut line
+                const cutLine = document.createElement('div');
+                cutLine.classList.add('cut-line');
+                plankDiv.appendChild(cutLine);
+            }
+        });
+
+        container.appendChild(plankDiv);
+    });
+}
+
+
+
 
