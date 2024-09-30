@@ -161,18 +161,17 @@ function calculateTotalArea() {
 
 document.getElementById('rectangleForm').onsubmit = e => e.preventDefault(); // Prevent form from submitting
 
-document.addEventListener('DOMContentLoaded', function() {
-    // Listen for keypress events on the width, height, and quantity inputs specifically
-    ['width', 'height', 'quantity'].forEach(id => {
-        document.getElementById(id).addEventListener('keypress', function(event) {
-            if (event.key === 'Enter') {
-                event.preventDefault(); // Prevent the default form submission
-                addRectangle();  // Call to add a rectangle when Enter is pressed
-            }
-        });
-    });
+// Event listener for 1D Cutting Stock Form
+document.getElementById('oneDCutForm').addEventListener('submit', function(event) {
+    event.preventDefault(); // Prevent the default form submission
+    performOneDCutting();   // Call your function
 });
 
+// Event listener for 2D Cutting Stock Form
+document.getElementById('rectangleForm').addEventListener('submit', function(event) {
+    event.preventDefault(); // Prevent the default form submission
+    addRectangle();         // Call your function
+});
 
 
 
