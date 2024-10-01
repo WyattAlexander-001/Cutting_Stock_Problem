@@ -1,0 +1,17 @@
+#container {
+    width: 500px; /* Adjust based on your needs */
+    height: 500px;
+    position: relative;
+    border: 1px solid #ccc;
+}
+
+.bin {
+    position: absolute;
+    border: 1px solid red;
+    background-color: rgba(255, 0, 0, 0.5);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 14px;
+    color: white;
+}
