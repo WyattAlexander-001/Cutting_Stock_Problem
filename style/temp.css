@@ -1,0 +1,157 @@
+/* Reset and Base Styles */
+/* * {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+  } */
+  
+  body {
+    font-family: Arial, sans-serif;
+    background-color: #ffb300;
+  }
+  
+  /* Centering Content */
+  .container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 20px;
+  }
+  
+  h1, h2 {
+    text-align: center;
+  }
+  
+  /* Header and Navigation */
+  header {
+    width: 100%;
+    background-color: #03941b;
+    display: flex;
+    align-items: center;
+    padding: 10px;
+  }
+  
+  .logo img {
+    height: 50px;
+  }
+  
+  .logo {
+    margin-right: auto;
+  }
+  
+  nav {
+    position: relative;
+  }
+  
+  .nav-menu {
+    list-style: none;
+    display: flex;
+    flex-direction: row;
+  }
+  
+  .nav-menu li {
+    margin: 0 10px;
+  }
+  
+  .nav-menu a {
+    color: #fff;
+    text-decoration: none;
+  }
+  
+  .hamburger {
+    display: none;
+    font-size: 24px;
+    color: #fff;
+    cursor: pointer;
+  }
+  
+  #nav-toggle {
+    display: none;
+  }
+  
+  /* Buttons */
+  button, input[type="submit"], input[type="button"] {
+    background-color: #0fc012;
+    color: #fff;
+    border: none;
+    padding: 10px 20px;
+    margin: 5px;
+    border-radius: 5px;
+    cursor: pointer;
+  }
+  
+  button:hover, input[type="submit"]:hover, input[type="button"]:hover {
+    background-color: #088024;
+  }
+  
+  /* Forms */
+  form {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    width: 100%;
+  }
+  
+  form label, form input, form button {
+    width: 100%;
+    max-width: 400px;
+    margin: 5px 0;
+  }
+  
+  form input {
+    padding: 10px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+  }
+  
+  /* Grid Layout */
+  .grid-container {
+    display: grid;
+    grid-template-columns: 1fr;
+    grid-gap: 20px;
+    width: 100%;
+  }
+  
+  @media (min-width: 768px) {
+    /* Grid Layout */
+    .grid-container {
+      grid-template-columns: 1fr 1fr;
+    }
+  
+    /* Navigation */
+    .nav-menu {
+      display: flex;
+      flex-direction: row;
+    }
+  
+    .hamburger {
+      display: none;
+    }
+  }
+  
+  @media (max-width: 768px) {
+    /* Navigation */
+    header {
+      flex-wrap: wrap;
+    }
+  
+    .nav-menu {
+      display: none;
+      flex-direction: column;
+      width: 100%;
+    }
+  
+    .nav-menu li {
+      text-align: center;
+      margin: 10px 0;
+    }
+  
+    .hamburger {
+      display: block;
+    }
+  
+    #nav-toggle:checked + .hamburger + .nav-menu {
+      display: flex;
+    }
+  }
+  

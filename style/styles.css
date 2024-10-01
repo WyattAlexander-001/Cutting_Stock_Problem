@@ -1,0 +1,139 @@
+body {
+    background-color: gold;
+    font-family: Arial, sans-serif;
+    margin: 20px;
+}
+
+footer {
+    margin-top: 40px;
+}
+
+footer h2 {
+    margin-bottom: 10px;
+}
+
+.references {
+    list-style-type: decimal;
+    margin-left: 20px;
+}
+
+.references li {
+    margin-bottom: 15px;
+    text-align: justify;
+}
+
+.references li em {
+    font-style: italic;
+}
+
+.references a {
+    color: blue;
+    text-decoration: none;
+}
+
+.references a:hover {
+    text-decoration: underline;
+}
+
+/* Modal Popup*/
+.modal {
+    display: none;
+    position: fixed;
+    z-index: 1;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    overflow: auto;
+    background-color: rgb(0,0,0);
+    background-color: rgba(0,0,0,0.4);
+}
+
+.modal-content {
+    background-color: #fefefe;
+    margin: 15% auto;
+    padding: 20px;
+    border: 1px solid #888;
+    width: 80%;
+}
+
+.close {
+    color: #aaa;
+    float: right;
+    font-size: 28px;
+    font-weight: bold;
+}
+
+.close:hover,
+.close:focus {
+    color: black;
+    text-decoration: none;
+    cursor: pointer;
+}
+
+.modal-entry {
+    margin-bottom: 10px;
+    padding: 5px;
+    border-bottom: 1px solid #ccc;
+}
+
+.modal-entry span {
+    margin-right: 15px;
+}
+
+.modal-entry input {
+    width: 50px;
+}
+
+.modal-entry button {
+    margin-left: 10px;
+}
+
+/* 1-D Visual*/
+
+.visualization-container {
+    display: flex;
+    align-items: flex-end;
+    margin-top: 20px;
+}
+
+.plank {
+    position: relative;
+    width: 30px;
+    background-color: #ccc;
+    display: flex;
+    flex-direction: column-reverse;
+}
+
+
+.usable-section {
+    background-color: green;
+    width: 100%;
+}
+
+.waste-section {
+    background-color: red;
+    width: 100%;
+}
+
+.cut-line {
+    height: 2px;
+    background-color: black;
+    width: 100%;
+}
+
+.plank-container {
+    display: inline-block;
+    margin: 0 10px;
+    text-align: center;
+}
+
+.length-label {
+    margin-top: 5px;
+    font-weight: bold;
+    font-size: 14px;
+    color: #333;
+}
+
+
+
