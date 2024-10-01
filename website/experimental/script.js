@@ -1,18 +1,30 @@
 document.addEventListener('DOMContentLoaded', function() {
     var sprite = new ShelfPack(500, 500, { autoResize: true });
     var container = document.getElementById('container');
+    var fileInput = document.getElementById('fileInput');
 
-    // Example set of bins to pack
-    var bins = [
-        { id: 'a', w: 100, h: 100 },
-        { id: 'b', w: 200, h: 150 },
-        { id: 'c', w: 50, h: 50 },
-        { id: 'd', w: 150, h: 200 },
-        { id: 'e', w: 150, h: 200 },
-        { id: 'f', w: 100, h: 200 }
-    ];
+    fileInput.addEventListener('change', function(e) {
+        var file = e.target.files[0];
+        if (file && file.type === "application/json") {
+            var reader = new FileReader();
+            reader.onload = function(e) {
+                var bins;
+                try {
+                    bins = JSON.parse(e.target.result);
+                    visualizeBins(bins, sprite, container);
+                } catch (error) {
+                    console.error("Error parsing JSON:", error);
+                }
+            };
+            reader.readAsText(file);
+        }
+    });
+});
 
-    // Pack the bins and display them
+function visualizeBins(bins, sprite, container) {
+    container.innerHTML = ''; // Clear previous contents
+    sprite.clear(); // Clear the sprite to start fresh
+
     var results = sprite.pack(bins);
     results.forEach(bin => {
         var div = document.createElement('div');
@@ -24,4 +36,4 @@ document.addEventListener('DOMContentLoaded', function() {
         div.textContent = bin.id;
         container.appendChild(div);
     });
-});
+}
