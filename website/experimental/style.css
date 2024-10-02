@@ -1,7 +1,7 @@
 #container {
     position: relative;
-    width: 500px; /* Example width, adjust as needed */
-    height: 500px; /* Example height, adjust as needed */
+    width: 500px; 
+    height: 500px; 
     background-color: red; /* Canvas background */
 }
 
@@ -13,5 +13,5 @@
     align-items: center;
     justify-content: center;
     color: white; /* Ensuring text is visible on green background */
-    font-size: 12px; /* Adjust font size as needed */
+    font-size: 12px; 
 }

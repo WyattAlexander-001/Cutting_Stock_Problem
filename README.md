@@ -132,7 +132,7 @@ Factor of speed increase 2.4/0.4 = 6
 
 Percent increase = ((Factor - 1)/1) * 100 = 500% increase in speed
 
-Sorting speed increase is 525% increase
+Sorting speed increase is 500% increase
 
 ![Speed Increase](website/README_images/SortingSpeedIncrease.png)
 
