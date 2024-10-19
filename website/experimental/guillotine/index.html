@@ -1,0 +1,83 @@
+<!-- index.html -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Guillotine Bin Packing Visualization</title>
+  <style>
+    #canvas {
+      border: 1px solid black;
+    }
+  </style>
+</head>
+<body>
+  <h1>Guillotine Bin Packing Visualization</h1>
+  <canvas id="canvas" width="800" height="400"></canvas>
+  <script src="Guillotine.js"></script>
+  <script>
+    // Ensure the code runs after the DOM is loaded
+    window.onload = function () {
+      // Create a new Guillotine bin
+      const bin = new Guillotine({
+        binWidth: 10,
+        binHeight: 6,
+        allowRotation: false,
+        heuristic: 'best_shortside',
+        rectangleMerge: true,
+        splitHeuristic: 'default',
+      });
+
+      // Define items to pack
+      const items = [
+        new Item(2, 3),
+        new Item(3, 3),
+        new Item(4, 1),
+        new Item(2, 3),
+        new Item(2, 2),
+        new Item(1, 2),
+      ];
+
+      // Insert items into the bin
+      for (const item of items) {
+        if (!bin.insert(item)) {
+          console.log('Item does not fit:', item);
+        }
+      }
+
+      console.log('Bin stats:', bin.binStats());
+
+      // Visualization
+      const canvas = document.getElementById('canvas');
+      const ctx = canvas.getContext('2d');
+
+      // Scale factor to fit the canvas
+      const scaleX = canvas.width / bin.binWidth;
+      const scaleY = canvas.height / bin.binHeight;
+
+      // Draw the bin
+      ctx.strokeStyle = 'black';
+      ctx.strokeRect(0, 0, bin.binWidth * scaleX, bin.binHeight * scaleY);
+
+      // Set the item color to green
+      ctx.fillStyle = 'green';
+
+
+      // Draw items
+      for (const item of bin.items) {
+        ctx.fillRect(
+          item.x * scaleX,
+          item.y * scaleY,
+          item.width * scaleX,
+          item.height * scaleY
+        );
+        ctx.strokeRect(
+          item.x * scaleX,
+          item.y * scaleY,
+          item.width * scaleX,
+          item.height * scaleY
+        );
+      }
+    };
+  </script>
+</body>
+</html>
