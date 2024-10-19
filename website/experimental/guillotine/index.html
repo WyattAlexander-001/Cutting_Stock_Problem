@@ -1,4 +1,3 @@
-<!-- index.html -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -8,59 +7,138 @@
     #canvas {
       border: 1px solid black;
     }
+    body {
+      font-family: Arial, sans-serif;
+    }
+    .controls {
+      margin-top: 10px;
+    }
+    label {
+      margin-right: 5px;
+    }
   </style>
 </head>
 <body>
   <h1>Guillotine Bin Packing Visualization</h1>
   <canvas id="canvas" width="800" height="400"></canvas>
+
+  <div class="controls">
+    <label for="binWidth">Bin Width:</label>
+    <input type="number" id="binWidth" value="10" min="1">
+    <label for="binHeight">Bin Height:</label>
+    <input type="number" id="binHeight" value="6" min="1">
+  </div>
+
+  <div class="controls">
+    <input type="file" id="fileInput" accept=".json">
+    <button id="loadButton">Load Items</button>
+  </div>
+
   <script src="Guillotine.js"></script>
+
   <script>
     // Ensure the code runs after the DOM is loaded
     window.onload = function () {
+      // Optional: Set initial canvas background to red
+      const canvas = document.getElementById('canvas');
+      const ctx = canvas.getContext('2d');
+
+      ctx.fillStyle = 'red';
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+    };
+
+    // Handle file input
+    const fileInput = document.getElementById('fileInput');
+    const loadButton = document.getElementById('loadButton');
+
+    loadButton.addEventListener('click', function () {
+      const file = fileInput.files[0];
+      if (!file) {
+        alert('Please select a JSON file first.');
+        return;
+      }
+
+      const reader = new FileReader();
+
+      reader.onload = function (e) {
+        try {
+          const jsonData = JSON.parse(e.target.result);
+          processItemData(jsonData);
+        } catch (error) {
+          alert('Error parsing JSON file: ' + error.message);
+        }
+      };
+
+      reader.readAsText(file);
+    });
+
+    function processItemData(jsonData) {
+      const binWidthInput = document.getElementById('binWidth');
+      const binHeightInput = document.getElementById('binHeight');
+
+      const binWidth = parseFloat(binWidthInput.value) || 10;
+      const binHeight = parseFloat(binHeightInput.value) || 6;
+
       // Create a new Guillotine bin
       const bin = new Guillotine({
-        binWidth: 10,
-        binHeight: 6,
+        binWidth: binWidth,
+        binHeight: binHeight,
         allowRotation: false,
         heuristic: 'best_shortside',
         rectangleMerge: true,
         splitHeuristic: 'default',
       });
 
-      // Define items to pack
-      const items = [
-        new Item(2, 3),
-        new Item(3, 3),
-        new Item(4, 1),
-        new Item(2, 3),
-        new Item(2, 2),
-        new Item(1, 2),
-      ];
-
-      // Insert items into the bin
-      for (const item of items) {
-        if (!bin.insert(item)) {
-          console.log('Item does not fit:', item);
+      // Create items according to quantities
+      const items = [];
+      for (const itemData of jsonData) {
+        const width = itemData.width;
+        const height = itemData.height;
+        const quantity = itemData.quantity || 1; // Default to 1 if not specified
+        for (let i = 0; i < quantity; i++) {
+          items.push(new Item(width, height));
         }
       }
 
-      console.log('Bin stats:', bin.binStats());
+      // Insert items into the bin
+      let allItemsFit = true;
+      for (const item of items) {
+        if (!bin.insert(item)) {
+          console.log('Item does not fit:', item);
+          allItemsFit = false;
+        }
+      }
 
+      if (!allItemsFit) {
+        alert('Some items did not fit in the bin.');
+      }
+
+      // Visualize the bin
+      drawBin(bin);
+    }
+
+    function drawBin(bin) {
       // Visualization
       const canvas = document.getElementById('canvas');
       const ctx = canvas.getContext('2d');
+
+      // Clear the canvas
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+      // Set the canvas background to red
+      ctx.fillStyle = 'red';
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
 
       // Scale factor to fit the canvas
       const scaleX = canvas.width / bin.binWidth;
       const scaleY = canvas.height / bin.binHeight;
 
-      // Draw the bin
+      // Draw the bin outline
       ctx.strokeStyle = 'black';
       ctx.strokeRect(0, 0, bin.binWidth * scaleX, bin.binHeight * scaleY);
 
       // Set the item color to green
       ctx.fillStyle = 'green';
-
 
       // Draw items
       for (const item of bin.items) {
@@ -77,7 +155,8 @@
           item.height * scaleY
         );
       }
-    };
+    }
   </script>
+  
 </body>
 </html>
