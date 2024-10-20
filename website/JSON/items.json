@@ -4,6 +4,12 @@
     {"width": 4, "height": 1, "quantity": 1},
     {"width": 2, "height": 3, "quantity": 1},
     {"width": 2, "height": 2, "quantity": 1},
-    {"width": 1, "height": 2, "quantity": 1}
+    {"width": 1, "height": 2, "quantity": 1},
+    {"width": 2, "height": 3, "quantity": 2},
+    {"width": 3, "height": 3, "quantity": 1},
+    {"width": 4, "height": 1, "quantity": 6},
+    {"width": 2, "height": 3, "quantity": 3},
+    {"width": 2, "height": 2, "quantity": 5},
+    {"width": 1, "height": 2, "quantity": 3}
   ]
   
