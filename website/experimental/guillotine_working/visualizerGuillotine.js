@@ -1,3 +1,5 @@
+
+
 // Ensure the code runs after the DOM is loaded
 window.onload = function () {
     // Optional: Set initial canvas background to red

@@ -43,7 +43,7 @@ import { CanvasPacker } from './CanvasPacker.js';
 document.addEventListener('DOMContentLoaded', function() {
     var container = document.getElementById('container');
     var fileInput = document.getElementById('fileInput');
-    var packer = new CanvasPacker(500, 500); // Modify dimensions as needed
+    var packer = new CanvasPacker(300, 300); // Modify dimensions as needed
 
     fileInput.addEventListener('change', function(e) {
         var file = e.target.files[0];
