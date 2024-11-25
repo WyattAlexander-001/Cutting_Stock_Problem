@@ -158,8 +158,11 @@ function calculateTotalArea() {
     console.log('Total Area:', totalAreaValue);
 }
 
-
-
+module.exports = {
+    groupRectanglesBySize,
+    updateQuantity,
+    showModal
+};
 
 
 
@@ -203,6 +206,14 @@ const exampleRectangles = [
     { width: 8, height: 2 },
     { width: 5, height: 5 }
 ];
+
+// for testing
+module.exports = {
+    area,
+    rotate,
+    rotateToLandscape,
+    totalArea
+};
 
 console.log("Total Area:", totalArea(exampleRectangles));
 console.log("Rotated to Landscape:", exampleRectangles.map(rotateToLandscape));
