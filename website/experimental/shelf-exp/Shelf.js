@@ -103,11 +103,19 @@ class ShelfBin {
   binStats() {
     const usedArea = this.items.reduce((acc, item) => acc + item.area, 0);
     const totalArea = this.binWidth * this.binHeight;
+    const efficiency = usedArea / totalArea;
+    const wasteArea = totalArea - usedArea;
+    const wastePercentage = ((wasteArea / totalArea) * 100).toFixed(2);
+    const efficiencyPercentage = (efficiency * 100).toFixed(2);
+
     return {
       width: this.binWidth,
       height: this.binHeight,
       area: totalArea,
-      efficiency: usedArea / totalArea,
+      efficiency,
+      efficiencyPercentage,
+      wasteArea,
+      wastePercentage,
       items: this.items,
     };
   }

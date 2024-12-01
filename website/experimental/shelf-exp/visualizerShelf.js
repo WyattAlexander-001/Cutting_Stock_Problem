@@ -1,4 +1,5 @@
 // visualizerShelf.js
+const SCALE = 20; // Increase this value to make the visualization larger
 
 document.addEventListener('DOMContentLoaded', function() {
     // Reference to the bin container div
@@ -56,8 +57,10 @@ document.addEventListener('DOMContentLoaded', function() {
         items.length = 0;
         items.push(...remainingItems);
   
+        const binStats = bin.binStats();
+  
         // Visualize the bin
-        const binDiv = createBinDiv(bin, binIndex);
+        const binDiv = createBinDiv(bin, binIndex, binStats);
         binContainer.appendChild(binDiv);
         binIndex++;
   
@@ -73,42 +76,70 @@ document.addEventListener('DOMContentLoaded', function() {
     }
   
     // Function to create bin visualization
-    function createBinDiv(bin, binIndex) {
+    function createBinDiv(bin, binIndex, binStats) {
+      const binContainerDiv = document.createElement('div');
+      binContainerDiv.className = 'bin-container';
+      binContainerDiv.style.marginBottom = '20px';
+  
+      // Create a div to hold the bin number and percentages
+      const binTitle = document.createElement('div');
+      binTitle.innerHTML = `<strong>Bin ${binIndex + 1}</strong><br>
+      Efficiency: ${binStats.efficiencyPercentage}%<br>
+      Waste: ${binStats.wastePercentage}%`;
+      binContainerDiv.appendChild(binTitle);
+  
       const binDiv = document.createElement('div');
       binDiv.className = 'bin';
-      binDiv.style.width = `${bin.binWidth * 10}px`;
-      binDiv.style.height = `${bin.binHeight * 10}px`;
+      binDiv.style.width = `${bin.binWidth * SCALE}px`;
+      binDiv.style.height = `${bin.binHeight * SCALE}px`;
       binDiv.style.position = 'relative';
       binDiv.style.border = '1px solid black';
-      binDiv.style.margin = '10px';
-      binDiv.innerHTML = `<strong>Bin ${binIndex + 1}</strong>`;
+      binDiv.style.margin = '10px 0';
+      binDiv.style.backgroundColor = 'red'; // Waste area is red
+  
+      // Add dimensions inside the bin
+      const dimensionsDiv = document.createElement('div');
+      dimensionsDiv.style.position = 'absolute';
+      dimensionsDiv.style.bottom = '5px';
+      dimensionsDiv.style.right = '5px';
+      dimensionsDiv.style.backgroundColor = 'rgba(255, 255, 255, 0.7)';
+      dimensionsDiv.style.padding = '2px 4px';
+      dimensionsDiv.style.fontSize = '12px';
+      dimensionsDiv.innerHTML = `${bin.binWidth} x ${bin.binHeight}`;
+      binDiv.appendChild(dimensionsDiv);
   
       // Add items
       bin.items.forEach(item => {
         const itemDiv = document.createElement('div');
         itemDiv.className = 'item';
-        itemDiv.style.width = `${item.width * 10}px`;
-        itemDiv.style.height = `${item.height * 10}px`;
-        itemDiv.style.backgroundColor = getRandomColor();
+        itemDiv.style.width = `${item.width * SCALE}px`;
+        itemDiv.style.height = `${item.height * SCALE}px`;
+        itemDiv.style.backgroundColor = 'green'; // Used wood is green
         itemDiv.style.position = 'absolute';
-        itemDiv.style.left = `${item.x * 10}px`;
-        itemDiv.style.top = `${item.y * 10}px`;
+        itemDiv.style.left = `${item.x * SCALE}px`;
+        itemDiv.style.top = `${item.y * SCALE}px`;
         itemDiv.style.boxSizing = 'border-box';
         itemDiv.style.border = '1px solid #333';
+  
+        // Add dimensions inside the item
+        const itemDimensionsDiv = document.createElement('div');
+        itemDimensionsDiv.style.position = 'absolute';
+        itemDimensionsDiv.style.bottom = '2px';
+        itemDimensionsDiv.style.right = '2px';
+        itemDimensionsDiv.style.backgroundColor = 'rgba(255, 255, 255, 0.7)';
+        itemDimensionsDiv.style.padding = '1px 2px';
+        itemDimensionsDiv.style.fontSize = '10px';
+        itemDimensionsDiv.style.textAlign = 'right';
+        itemDimensionsDiv.style.pointerEvents = 'none'; // So it doesn't interfere with any interactions
+        itemDimensionsDiv.innerHTML = `${item.width} x ${item.height}`;
+  
+        itemDiv.appendChild(itemDimensionsDiv);
         binDiv.appendChild(itemDiv);
       });
   
-      return binDiv;
-    }
+      binContainerDiv.appendChild(binDiv);
   
-    // Function to generate random colors
-    function getRandomColor() {
-      const letters = '789ABCD';
-      let color = '#';
-      for (let i = 0; i < 6; i++) {
-        color += letters[Math.floor(Math.random() * letters.length)];
-      }
-      return color;
+      return binContainerDiv;
     }
   
     // Expose processItemData function to global scope
