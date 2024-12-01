@@ -84,12 +84,6 @@ function groupRectanglesBySize(rectangles) {
     return grouping;
 }
 
-function confirmRectangles() {
-    const modal = document.getElementById('rectangleModal');
-    modal.style.display = "none";
-    updateRectangleList();
-}
-
 // Close the modal when the user clicks on <span> (x)
 document.getElementsByClassName("close")[0].onclick = function() {
     const modal = document.getElementById('rectangleModal');
