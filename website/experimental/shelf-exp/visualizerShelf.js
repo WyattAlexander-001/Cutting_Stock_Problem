@@ -34,7 +34,7 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 
     // Prepare items
-    const items = [];
+    let items = [];
     data.forEach(itemData => {
       const { width, height, quantity } = itemData;
       for (let i = 0; i < quantity; i++) {
@@ -48,41 +48,98 @@ document.addEventListener('DOMContentLoaded', function() {
     // Clear previous bin visuals
     binContainer.innerHTML = '';
 
-    // Pack items into bins
-    let binIndex = 0;
-    let currentBinSizeIndex = 0;
-    while (items.length > 0) {
-      const { binWidth, binHeight } = binSizes[currentBinSizeIndex];
-      const bin = new ShelfBin({ binWidth, binHeight, bladeThickness });
+    // Initialize total areas
+    let totalItemsArea = 0;
+    let totalWasteArea = 0;
 
-      let remainingItems = [];
+    const binsUsed = [];
+
+    while (items.length > 0) {
+      let bestBinResult = null;
+
+      // Try bins from largest to smallest
+      for (const binSize of binSizes) {
+        const tempBin = new ShelfBin({
+          binWidth: binSize.binWidth,
+          binHeight: binSize.binHeight,
+          bladeThickness: bladeThickness,
+          allowRotation: true,
+        });
+
+        const remainingItems = [];
+        const tempItems = items.slice(); // Copy of items
+
+        tempItems.forEach(item => {
+          const tempItem = new Item(item.width, item.height);
+          const inserted = tempBin.insert(tempItem);
+          if (!inserted) {
+            remainingItems.push(item);
+          }
+        });
+
+        const numItemsPacked = tempBin.items.length;
+        const wasteArea = tempBin.binStats().wasteArea;
+
+        if (!bestBinResult || numItemsPacked > bestBinResult.numItemsPacked ||
+            (numItemsPacked === bestBinResult.numItemsPacked && wasteArea < bestBinResult.wasteArea)) {
+          bestBinResult = {
+            binSize: binSize,
+            numItemsPacked: numItemsPacked,
+            wasteArea: wasteArea,
+          };
+        }
+      }
+
+      if (!bestBinResult || bestBinResult.numItemsPacked === 0) {
+        alert('Some items could not be placed in any bin.');
+        break;
+      }
+
+      // Now, create the actual bin and pack the items
+      const selectedBin = new ShelfBin({
+        binWidth: bestBinResult.binSize.binWidth,
+        binHeight: bestBinResult.binSize.binHeight,
+        bladeThickness: bladeThickness,
+        allowRotation: true,
+      });
+
+      const remainingItems = [];
+
+      // Reset items to original dimensions before inserting
+      items.forEach(item => item.reset());
 
       items.forEach(item => {
-        const inserted = bin.insert(item);
+        const inserted = selectedBin.insert(item);
         if (!inserted) {
           remainingItems.push(item);
         }
       });
 
-      items.length = 0;
-      items.push(...remainingItems);
+      const binStats = selectedBin.binStats();
+      totalItemsArea += binStats.itemsArea;
+      totalWasteArea += binStats.wasteArea;
 
-      const binStats = bin.binStats();
+      binsUsed.push({
+        bin: selectedBin,
+        binStats: binStats,
+      });
 
-      // Visualize the bin
-      const binDiv = createBinDiv(bin, binIndex, binStats);
-      binContainer.appendChild(binDiv);
-      binIndex++;
-
-      // Move to next bin size
-      currentBinSizeIndex = (currentBinSizeIndex + 1) % binSizes.length;
-
-      // Break if no items could be placed in the bin
-      if (bin.items.length === 0) {
-        alert('Some items could not be placed in any bin.');
-        break;
-      }
+      items = remainingItems; // Reassign items for the next iteration
     }
+
+    // Display bins used
+    binsUsed.forEach((binData, index) => {
+      // Visualize the bin
+      const binDiv = createBinDiv(binData.bin, index, binData.binStats);
+      binContainer.appendChild(binDiv);
+    });
+
+    // Display final tally
+    const finalTallyDiv = document.createElement('div');
+    finalTallyDiv.innerHTML = `<h2>Final Tally</h2>
+    Total Rectangles Area: ${totalItemsArea.toFixed(2)}<br>
+    Total Waste Area: ${totalWasteArea.toFixed(2)}`;
+    binContainer.appendChild(finalTallyDiv);
   }
 
   // Function to create bin visualization
@@ -91,11 +148,11 @@ document.addEventListener('DOMContentLoaded', function() {
     binContainerDiv.className = 'bin-container';
     binContainerDiv.style.marginBottom = '20px';
 
-    // Create a div to hold the bin number and percentages
+    // Create a div to hold the bin number and areas
     const binTitle = document.createElement('div');
     binTitle.innerHTML = `<strong>Bin ${binIndex + 1}</strong><br>
-    Efficiency: ${binStats.efficiencyPercentage}%<br>
-    Waste: ${binStats.wastePercentage}%`;
+    Total Rectangles Area: ${binStats.itemsArea.toFixed(2)}<br>
+    Waste Area: ${binStats.wasteArea.toFixed(2)}`;
     binContainerDiv.appendChild(binTitle);
 
     const binDiv = document.createElement('div');
@@ -143,7 +200,7 @@ document.addEventListener('DOMContentLoaded', function() {
         }
 
         // If item is not at the bottom edge of the bin, apply bottom shadow
-        if (item.y + item.height < bin.binHeight) {
+        if (item.y + item.height + bladeThickness < bin.binHeight) {
           shadows.push(`inset 0 -${bladePx}px 0 -${bladePx}px black`);
         }
 
@@ -153,7 +210,7 @@ document.addEventListener('DOMContentLoaded', function() {
         }
 
         // If item is not at the right edge of the bin, apply right shadow
-        if (item.x + item.width < bin.binWidth) {
+        if (item.x + item.width + bladeThickness < bin.binWidth) {
           shadows.push(`inset -${bladePx}px 0 0 -${bladePx}px black`);
         }
 
@@ -184,6 +241,137 @@ document.addEventListener('DOMContentLoaded', function() {
 
     return binContainerDiv;
   }
+
+  // Event Listeners:
+
+  // Add event listener to "Add Bin Size" button
+  const addBinSizeButton = document.getElementById('addBinSize');
+  addBinSizeButton.addEventListener('click', function() {
+    const binSizesDiv = document.getElementById('binSizes');
+    const newBinSizeDiv = document.createElement('div');
+    newBinSizeDiv.className = 'bin-size';
+    newBinSizeDiv.innerHTML = `
+      <label>Bin Width:</label>
+      <input type="number" class="binWidth" value="10" min="1">
+      <label>Bin Height:</label>
+      <input type="number" class="binHeight" value="10" min="1">
+      <button class="removeBinSize">Remove</button>
+    `;
+    binSizesDiv.appendChild(newBinSizeDiv);
+
+    // Add event listener for the remove button
+    const removeButton = newBinSizeDiv.querySelector('.removeBinSize');
+    removeButton.addEventListener('click', function() {
+      binSizesDiv.removeChild(newBinSizeDiv);
+    });
+  });
+
+  // Add event listeners to existing remove buttons
+  document.querySelectorAll('.removeBinSize').forEach(button => {
+    button.addEventListener('click', function() {
+      const binSizeDiv = this.parentElement;
+      binSizeDiv.parentElement.removeChild(binSizeDiv);
+    });
+  });
+
+  const addItemButton = document.getElementById('addItemButton');
+  addItemButton.addEventListener('click', function() {
+    const itemList = document.getElementById('itemList');
+    const newItemDiv = document.createElement('div');
+    newItemDiv.className = 'item-entry';
+    newItemDiv.innerHTML = `
+      <label>Width:</label>
+      <input type="number" class="itemWidth" min="0.1" step="0.1">
+      <label>Height:</label>
+      <input type="number" class="itemHeight" min="0.1" step="0.1">
+      <label>Quantity:</label>
+      <input type="number" class="itemQuantity" value="1" min="1">
+      <button class="removeItemButton">Remove</button>
+    `;
+    itemList.appendChild(newItemDiv);
+
+    // Add event listener for the remove button
+    const removeButton = newItemDiv.querySelector('.removeItemButton');
+    removeButton.addEventListener('click', function() {
+      itemList.removeChild(newItemDiv);
+    });
+  });
+
+  const loadButton = document.getElementById('loadButton');
+  const fileInput = document.getElementById('fileInput');
+
+  loadButton.addEventListener('click', function () {
+    const file = fileInput.files[0];
+    if (file) {
+      // Handle file input
+      const reader = new FileReader();
+
+      reader.onload = function (e) {
+        try {
+          const jsonData = JSON.parse(e.target.result);
+          processItemData(jsonData);
+        } catch (error) {
+          alert('Error parsing JSON file: ' + error.message);
+        }
+      };
+
+      reader.readAsText(file);
+    } else {
+      // No file selected, process manual items
+      const jsonData = [];
+
+      const itemEntries = document.querySelectorAll('.item-entry');
+      itemEntries.forEach(entry => {
+        const width = parseFloat(entry.querySelector('.itemWidth').value);
+        const height = parseFloat(entry.querySelector('.itemHeight').value);
+        const quantity = parseInt(entry.querySelector('.itemQuantity').value) || 1;
+
+        if (width && height) {
+          jsonData.push({ width, height, quantity });
+        }
+      });
+
+      if (jsonData.length === 0) {
+        alert('Please enter items manually or select a JSON file.');
+        return;
+      }
+
+      processItemData(jsonData);
+    }
+  });
+
+  const saveToJsonButton = document.getElementById('saveToJsonButton');
+  saveToJsonButton.addEventListener('click', function() {
+    const jsonData = [];
+
+    const itemEntries = document.querySelectorAll('.item-entry');
+    itemEntries.forEach(entry => {
+      const width = parseFloat(entry.querySelector('.itemWidth').value);
+      const height = parseFloat(entry.querySelector('.itemHeight').value);
+      const quantity = parseInt(entry.querySelector('.itemQuantity').value) || 1;
+
+      if (width && height) {
+        jsonData.push({ width, height, quantity });
+      }
+    });
+
+    if (jsonData.length === 0) {
+      alert('No items to save.');
+      return;
+    }
+
+    const jsonString = JSON.stringify(jsonData, null, 2);
+    const blob = new Blob([jsonString], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = 'items.json';
+    link.click();
+
+    // Optionally, revoke the object URL after download
+    URL.revokeObjectURL(url);
+  });
 
   // Expose processItemData function to global scope
   window.processItemData = processItemData;

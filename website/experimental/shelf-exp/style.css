@@ -1,17 +1,65 @@
-#container {
-    position: relative;
-    width: 500px; 
-    height: 500px; 
-    background-color: red; /* Canvas background */
-}
+/* styles.css */
 
-.bin {
-    position: absolute;
+.bin-size {
+    margin-bottom: 10px;
+  }
+  .bin-size label {
+    margin-right: 5px;
+  }
+  .bin-size input {
+    width: 60px;
+    margin-right: 10px;
+  }
+  .bin-visualization {
+    display: inline-block;
+    margin: 10px;
+    text-align: center;
+  }
+  .bin-visualization canvas {
     border: 1px solid black;
+  }
+  .best-bin {
+    border: 2px solid green;
+  }
+  
+  #canvas {
+    border: 1px solid black;
+  }
+  body {
+    font-family: Arial, sans-serif;
+    background-color: white;
+  }
+  .controls {
+    margin-top: 10px;
+  }
+  
+  label {
+    margin-right: 5px;
+  }
+  
+  .item-entry {
+    margin-bottom: 10px;
+  }
+  .item-entry label {
+    margin-right: 5px;
+  }
+  .item-entry input {
+    width: 60px;
+    margin-right: 10px;
+  }
+  
+  .bin-container {
+    border: 1px solid #000;
+    padding: 10px;
+  }
+  .bin {
+    position: relative;
+    margin: 10px 0;
+  }
+  .item {
+    position: absolute;
     background-color: green;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    color: white; /* Ensuring text is visible on green background */
-    font-size: 12px; 
-}
+    border: 1px solid #000;
+    box-sizing: border-box;
+  }
+  
