@@ -3,15 +3,16 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="./style/styles.css">
-    <!-- Removed temp.css if it's not needed anymore -->
-    <title>Cutting Stock Problem</title>
+    <title>Bin Packing Visualization - Guillotine and Shelf Algorithms</title>
 </head>
 <body>
     <div class="container">
+        <!-- Header Section -->
         <header>
             <a href="#" class="logo">
-                <img src="./" alt="Logo" />             
+                <img src="./images/logo.png" alt="Logo" />             
                 <h1>Welcome To The Cutting Stock Calculator, CSC!</h1>
             </a>            
             <nav>
@@ -25,57 +26,113 @@
                 </ul>
             </nav>
         </header>
-        <main class="grid-container">
 
-            <!-- Existing 1D Cutting Stock Form -->
-            <section>
+        <!-- Main Content -->
+        <main class="grid-container">
+            <!-- 1D Cutting Stock Form -->
+            <section class="form-section">
                 <h2>1D Cutting Stock Problem:</h2>
                 <form id="oneDCutForm">
                     <label for="woodLengths">Enter Wood Lengths (comma-separated, in feet):</label>
-                    <input type="text" id="woodLengths" required>
+                    <input type="text" id="woodLengths" placeholder="e.g., 8,10,12" required>
 
                     <!-- Container for Desired Cuts -->
                     <div id="desiredCutsContainer">
                         <h3>Desired Cuts:</h3>
                         <div class="desired-cut">
                             <label for="cutSize1">Cut Size (feet):</label>
-                            <input type="number" name="cutSizes" class="cutSize" step="0.01" required>
+                            <input type="number" name="cutSizes" class="cutSize" step="0.01" placeholder="e.g., 2.5" required>
                             
                             <label for="cutQuantity1">Quantity:</label>
-                            <input type="number" name="cutQuantities" class="cutQuantity" min="1" required>
+                            <input type="number" name="cutQuantities" class="cutQuantity" min="1" placeholder="e.g., 4" required>
                             
                             <button type="button" class="removeCut">Remove</button>
                         </div>
                     </div>
 
-                    <button type="button" id="addCut">Add Another Cut</button>
+                    <button type="button" id="addCut" class="btn">Add Another Cut</button>
 
                     <label for="bladeThickness">Blade Thickness (inches):</label>
                     <input type="number" id="bladeThickness" value="0.125" step="0.01" required>
 
-                    <button type="button" onclick="loadJSON1D()">Load JSON File</button>
+                    <button type="button" onclick="loadJSON1D()" class="btn">Load JSON File</button>
                     <input type="file" id="fileInput1D" hidden>
 
-                    <button type="submit">Calculate Cuts</button>
+                    <button type="submit" class="btn primary">Calculate Cuts</button>
                 </form>
-
                 <div id="cutResults"></div>
             </section>
 
             <!-- 1D Cutting Stock Visualization -->
-            <section>
+            <section class="visualization-section">
                 <h2>1D Cutting Stock Visualization:</h2>
                 <div id="oneDVisualization" class="visualization-container"></div>
             </section>
 
+            <!-- Bin Packing Visualization -->
+            <section class="bin-packing-section">
+                <h1>Bin Packing Visualization - Guillotine and Shelf Algorithms</h1>
+                
+                <!-- Bin Sizes -->
+                <h2>Bin Sizes</h2>
+                <div id="binSizes">
+                    <div class="bin-size">
+                        <label>Bin Width:</label>
+                        <input type="number" class="binWidth" value="8" min="1">
+                        <label>Bin Height:</label>
+                        <input type="number" class="binHeight" value="10" min="1">
+                        <button class="removeBinSize btn">Remove</button>
+                    </div>
+                    <div class="bin-size">
+                        <label>Bin Width:</label>
+                        <input type="number" class="binWidth" value="10" min="1">
+                        <label>Bin Height:</label>
+                        <input type="number" class="binHeight" value="14" min="1">
+                        <button class="removeBinSize btn">Remove</button>
+                    </div>
+                </div>
+                <button id="addBinSize" class="btn">Add Bin Size</button>
+
+                <!-- Blade Thickness -->
+                <h2>Blade Thickness</h2>
+                <div class="blade-thickness">
+                    <label>Blade Thickness:</label>
+                    <input type="number" id="bladeThickness" value="0.125" min="0" step="0.01">
+                </div>
+
+                <!-- Controls -->
+                <div class="controls">
+                    <input type="file" id="fileInput" accept=".json">
+                    <button id="loadButton" class="btn">Load Items</button>
+                </div>
+
+                <!-- Items Input -->
+                <h2>Items</h2>
+                <div id="itemList">
+                    <!-- Item inputs will be added here -->
+                </div>
+                <button id="addItemButton" class="btn">Add Item</button>
+                <button id="saveToJsonButton" class="btn">Save Items to JSON</button>
+
+                <!-- Shelf Algorithm Visualization -->
+                <h2>Shelf Algorithm Visualization</h2>
+                <div id="shelfBinContainer"></div>
+
+                <!-- Guillotine Algorithm Visualization -->
+                <h2>Guillotine Algorithm Visualization</h2>
+                <div id="guillotineBinContainer"></div>
+            </section>
+
             <!-- About Section -->
-            <section>
+            <section class="about-section">
                 <h2>About:</h2>
-                <p id="">The Cutting Stock Problem is a combinatorial optimization problem that involves cutting large sheets of material into smaller pieces in order to minimize waste...</p>
+                <p>The Cutting Stock Problem is a combinatorial optimization problem that involves cutting large sheets of material into smaller pieces in order to minimize waste...</p>
+                
                 <h2>How to Cut Your Materials After Using the 2D Cutting Stock Calculator:</h2>
                 <p>As a DIY enthusiast, you can achieve professional results by following these simple steps to cut your materials accurately and minimize waste:</p>
                 <ol>
-                    <li><strong>Gather Your Tools:</strong>
+                    <li>
+                        <strong>Gather Your Tools:</strong>
                         <ul>
                             <li>A <strong>table saw</strong> or <strong>circular saw</strong> suitable for your material.</li>
                             <li>Measuring tools:
@@ -95,19 +152,22 @@
                             </li>
                         </ul>
                     </li>
-                    <li><strong>Understand Blade Thickness (Kerf):</strong>
+                    <li>
+                        <strong>Understand Blade Thickness (Kerf):</strong>
                         <ul>
                             <li>The saw blade removes material equal to its thickness, known as the <strong>kerf</strong> (typically about 1/8 inch).</li>
                             <li>Accounting for the kerf is essential to ensure precise cuts and minimize waste.</li>
                         </ul>
                     </li>
-                    <li><strong>Review the Cutting Plan:</strong>
+                    <li>
+                        <strong>Review the Cutting Plan:</strong>
                         <ul>
                             <li>Examine the optimized cutting layout provided by the calculator.</li>
                             <li>Note the dimensions and the sequence of cuts.</li>
                         </ul>
                     </li>
-                    <li><strong>Measure and Mark Cut Lines Accurately:</strong>
+                    <li>
+                        <strong>Measure and Mark Cut Lines Accurately:</strong>
                         <ul>
                             <li>Use your measuring tape to mark the dimensions on your material.</li>
                             <li>For precise lines:
@@ -124,19 +184,22 @@
                             </li>
                         </ul>
                     </li>
-                    <li><strong>Set Up Your Saw:</strong>
+                    <li>
+                        <strong>Set Up Your Saw:</strong>
                         <ul>
                             <li>Adjust the saw's fence or guide to match your measurements, considering the kerf.</li>
                             <li>Ensure you're using the appropriate blade for your material.</li>
                         </ul>
                     </li>
-                    <li><strong>Make the Cuts:</strong>
+                    <li>
+                        <strong>Make the Cuts:</strong>
                         <ul>
                             <li>Follow the marked lines carefully, cutting all the way through the material.</li>
                             <li>It's efficient to make all cuts in one direction first (e.g., all horizontal cuts), then proceed to the perpendicular cuts.</li>
                         </ul>
                     </li>
-                    <li><strong>Maintain Safety:</strong>
+                    <li>
+                        <strong>Maintain Safety:</strong>
                         <ul>
                             <li>Always wear your safety gear:
                                 <ul>
@@ -149,7 +212,8 @@
                             <li>Ensure the material is securely clamped or supported before cutting.</li>
                         </ul>
                     </li>
-                    <li><strong>Verify Your Cuts:</strong>
+                    <li>
+                        <strong>Verify Your Cuts:</strong>
                         <ul>
                             <li>Measure each piece after cutting to ensure accuracy.</li>
                             <li>If necessary, make minor adjustments to achieve the desired dimensions.</li>
@@ -159,6 +223,8 @@
                 <p>By carefully measuring, marking precisely with a sharp pencil or marking knife, and accounting for blade thickness, you can minimize waste and achieve professional-quality results in your DIY projects.</p>
             </section>
         </main>
+
+        <!-- Footer Section -->
         <footer>
             <section>
                 <h2>Source Code:</h2>
@@ -173,25 +239,31 @@
                     <li>Chris Nunez</li>
                 </ul>
             </section>
-            <section>
-                <h2>Reference(s):</h2>
-                <ul class="references">
-                    <li>[1] E. S. Kokten and C. Sel, “A cutting stock problem in the wood products industry: A two-stage solution approach,” International Transactions in Operational Research, vol. 29, no. 2, pp. 879–907, 2022. [Online]. Available: https://tinyurl.com/ytmnm482.</li>
-                    <li>[2] T.-H. Nguyen and X.-T. Nguyen, "Space Splitting and Merging Technique for Online 3-D Bin Packing," Mathematics, vol. 11, no. 8, Apr. 2023. [Online]. Available: https://tinyurl.com/5xy3frwy.</li>
-                    <li>[3] A. A. Vaidya, M. Gaugler, and D. A. Smith, “Green route to modification of wood waste, cellulose and hemicellulose using reactive extrusion,” Carbohydrate Polymers, vol. 136, pp. 1238–1250, Jan. 2016. doi: https://doi.org/10.1016/j.carbpol.2015.10.033. [Online]. Available: https://tinyurl.com/3paj6rsr.</li>
-                    <li>[4] Y. Shiomi et al., "The Solution of 2-Dimensional Rectangular Cutting Stock Problem Considering Cutting Process," in 2007 IEEE International Conference on Automation Science and Engineering, Scottsdale, AZ, USA, 2007, pp. 140-145. doi: 10.1109/COASE.2007.4341732. [Online]. Available: https://tinyurl.com/ynhdrjtz.</li>
-                    <li>[5] R. Zhao, T. Liang, Z. Wu, D. van den Berg, M. Thürer, and T. Weise, “Randomized Local Search on the 2D Rectangular Bin Packing Problem with Item Rotation,” in Proceedings of the Genetic and Evolutionary Computation Conference Companion, 2024, pp. 235–238. doi: 10.1145/3638530.3654139. [Online]. Available: https://tinyurl.com/5n7waccx.</li>
-                    <li>[6] A. Neuenfeldt Júnior et al., "The machining torch movement for the rectangular plasma sheet metal cut," PLoS ONE, vol. 18, no. 9, p. e0291184, Sep. 2023. doi: 10.1371/journal.pone.0291184. [Online]. Available: https://tinyurl.com/3s4k48ty.</li>
-                    <li>[7] X. Zhao et al., "An efficient constructive heuristic for the rectangular packing problem with rotations," PLoS ONE, vol. 18, no. 12, p. e0295206, Dec. 2023. doi: 10.1371/journal.pone.0295206. [Online]. Available: https://tinyurl.com/2xc2e5wb.</li>
-                    <li>[8] L. Ribeiro and A. A. Ananno, "A Software Toolbox for Realistic Dataset Generation for Testing Online and Offline 3D Bin Packing Algorithms," Processes, vol. 11, no. 7, Jun. 2023. doi: 10.3390/pr11071909. [Online]. Available: https://tinyurl.com/yck4zmn5.</li>
-                    <li>[9] N. Ram, “Optimizing E-commerce: Solving the Bin Packing Problem,” Medium, Apr. 14, 2023. [Online]. Available: https://tinyurl.com/d7mdmkbk.</li>
-                    <li>[10] P. Buonaiuto, Existing Work. [Source code]. Holbrook, NY: Built By Peter LLC., 20XX.</li>
-                    <li>[11] UnrealEngineHTML5, “GitHub - UnrealEngineHTML5/Documentation,” GitHub, 2019. https://github.com/UnrealEngineHTML5/Documentation (accessed Sep. 15, 2024). [Online]. Available:https://tinyurl.com/yutvrdm4</li>
-                    <li>[12] “HTML5 support ?,” Epic Developer Community Forums, May 21, 2023. https://forums.unrealengine.com/t/html5-support/1172997/2 (accessed Sep. 15, 2024).[Online]. Available:https://tinyurl.com/mr4826ha</li>
-                </ul>
-            </section>
         </footer>
+
+        <!-- References Section -->
+        <section class="references-section">
+            <h2>Reference(s):</h2>
+            <ul class="references">
+                <li>[1] E. S. Kokten and C. Sel, “A cutting stock problem in the wood products industry: A two-stage solution approach,” International Transactions in Operational Research, vol. 29, no. 2, pp. 879–907, 2022. [Online]. Available: https://tinyurl.com/ytmnm482.</li>
+                <li>[2] T.-H. Nguyen and X.-T. Nguyen, "Space Splitting and Merging Technique for Online 3-D Bin Packing," Mathematics, vol. 11, no. 8, Apr. 2023. [Online]. Available: https://tinyurl.com/5xy3frwy.</li>
+                <li>[3] A. A. Vaidya, M. Gaugler, and D. A. Smith, “Green route to modification of wood waste, cellulose and hemicellulose using reactive extrusion,” Carbohydrate Polymers, vol. 136, pp. 1238–1250, Jan. 2016. doi: https://doi.org/10.1016/j.carbpol.2015.10.033. [Online]. Available: https://tinyurl.com/3paj6rsr.</li>
+                <li>[4] Y. Shiomi et al., "The Solution of 2-Dimensional Rectangular Cutting Stock Problem Considering Cutting Process," in 2007 IEEE International Conference on Automation Science and Engineering, Scottsdale, AZ, USA, 2007, pp. 140-145. doi: 10.1109/COASE.2007.4341732. [Online]. Available: https://tinyurl.com/ynhdrjtz.</li>
+                <li>[5] R. Zhao, T. Liang, Z. Wu, D. van den Berg, M. Thürer, and T. Weise, “Randomized Local Search on the 2D Rectangular Bin Packing Problem with Item Rotation,” in Proceedings of the Genetic and Evolutionary Computation Conference Companion, 2024, pp. 235–238. doi: 10.1145/3638530.3654139. [Online]. Available: https://tinyurl.com/5n7waccx.</li>
+                <li>[6] A. Neuenfeldt Júnior et al., "The machining torch movement for the rectangular plasma sheet metal cut," PLoS ONE, vol. 18, no. 9, p. e0291184, Sep. 2023. doi: 10.1371/journal.pone.0291184. [Online]. Available: https://tinyurl.com/3s4k48ty.</li>
+                <li>[7] X. Zhao et al., "An efficient constructive heuristic for the rectangular packing problem with rotations," PLoS ONE, vol. 18, no. 12, p. e0295206, Dec. 2023. doi: 10.1371/journal.pone.0295206. [Online]. Available: https://tinyurl.com/2xc2e5wb.</li>
+                <li>[8] L. Ribeiro and A. A. Ananno, "A Software Toolbox for Realistic Dataset Generation for Testing Online and Offline 3D Bin Packing Algorithms," Processes, vol. 11, no. 7, Jun. 2023. doi: 10.3390/pr11071909. [Online]. Available: https://tinyurl.com/yck4zmn5.</li>
+                <li>[9] N. Ram, “Optimizing E-commerce: Solving the Bin Packing Problem,” Medium, Apr. 14, 2023. [Online]. Available: https://tinyurl.com/d7mdmkbk.</li>
+                <li>[10] P. Buonaiuto, Existing Work. [Source code]. Holbrook, NY: Built By Peter LLC., 20XX.</li>
+                <li>[11] UnrealEngineHTML5, “GitHub - UnrealEngineHTML5/Documentation,” GitHub, 2019. https://github.com/UnrealEngineHTML5/Documentation (accessed Sep. 15, 2024). [Online]. Available:https://tinyurl.com/yutvrdm4</li>
+                <li>[12] “HTML5 support ?,” Epic Developer Community Forums, May 21, 2023. https://forums.unrealengine.com/t/html5-support/1172997/2 (accessed Sep. 15, 2024).[Online]. Available:https://tinyurl.com/mr4826ha</li>
+            </ul>
+        </section>
+
+        <!-- Scripts -->
+        <script src="script.js"></script>
+        <script src="Combo.js"></script>
+        <script src="visualizerCombo.js"></script>
     </div>
-    <script src="script.js"></script>
 </body>
 </html>
