@@ -240,15 +240,10 @@ class Item {
     }
   
     itemFitsRect(item, rect, rotation = false) {
-      const blade = this.bladeThickness;
       if (!rotation) {
-        const requiredWidth = item.width + blade;
-        const requiredHeight = item.height + blade;
-        return requiredWidth <= rect.width && requiredHeight <= rect.height;
+        return item.width <= rect.width && item.height <= rect.height;
       } else {
-        const requiredWidth = item.height + blade;
-        const requiredHeight = item.width + blade;
-        return requiredWidth <= rect.width && requiredHeight <= rect.height;
+        return item.height <= rect.width && item.width <= rect.height;
       }
     }
   
@@ -258,41 +253,35 @@ class Item {
   
       if (split) {
         // Horizontal split
-        const topX = freeRect.x;
-        const topY = freeRect.y + item.height + blade;
-        const topW = freeRect.width;
-        const topH = freeRect.height - item.height - blade;
+        const topY = item.y + item.height + blade;
+        const topH = freeRect.y + freeRect.height - topY;
   
-        const rightX = freeRect.x + item.width + blade;
-        const rightY = freeRect.y;
-        const rightW = freeRect.width - item.width - blade;
+        if (topH > 0) {
+          result.push(new FreeRectangle(freeRect.width, topH, freeRect.x, topY));
+        }
+  
+        const rightX = item.x + item.width + blade;
+        const rightW = freeRect.x + freeRect.width - rightX;
         const rightH = item.height;
   
         if (rightW > 0 && rightH > 0) {
-          result.push(new FreeRectangle(rightW, rightH, rightX, rightY));
-        }
-  
-        if (topW > 0 && topH > 0) {
-          result.push(new FreeRectangle(topW, topH, topX, topY));
+          result.push(new FreeRectangle(rightW, rightH, rightX, item.y));
         }
       } else {
         // Vertical split
-        const rightX = freeRect.x + item.width + blade;
-        const rightY = freeRect.y;
-        const rightW = freeRect.width - item.width - blade;
-        const rightH = freeRect.height;
+        const rightX = item.x + item.width + blade;
+        const rightW = freeRect.x + freeRect.width - rightX;
   
-        const bottomX = freeRect.x;
-        const bottomY = freeRect.y + item.height + blade;
-        const bottomW = item.width;
-        const bottomH = freeRect.height - item.height - blade;
-  
-        if (rightW > 0 && rightH > 0) {
-          result.push(new FreeRectangle(rightW, rightH, rightX, rightY));
+        if (rightW > 0) {
+          result.push(new FreeRectangle(rightW, freeRect.height, rightX, freeRect.y));
         }
   
+        const bottomY = item.y + item.height + blade;
+        const bottomH = freeRect.y + freeRect.height - bottomY;
+        const bottomW = item.width;
+  
         if (bottomW > 0 && bottomH > 0) {
-          result.push(new FreeRectangle(bottomW, bottomH, bottomX, bottomY));
+          result.push(new FreeRectangle(bottomW, bottomH, item.x, bottomY));
         }
       }
   
@@ -401,8 +390,6 @@ class Item {
     insert(item) {
       const best = this.findBestScore(item);
       if (best) {
-        const blade = this.bladeThickness;
-  
         if (best.rotated) {
           item.rotate();
         }
@@ -428,8 +415,8 @@ class Item {
   
     splitFreeRect(item, freeRect) {
       // Leftover lengths
-      const w = freeRect.width - item.width - this.bladeThickness;
-      const h = freeRect.height - item.height - this.bladeThickness;
+      const w = freeRect.width - item.width;
+      const h = freeRect.height - item.height;
   
       let split;
       switch (this.splitHeuristic) {
