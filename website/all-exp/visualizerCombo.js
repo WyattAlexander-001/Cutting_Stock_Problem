@@ -287,7 +287,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
     // Create a div to hold the bin number and areas
     const binTitle = document.createElement('div');
-    binTitle.innerHTML = `<strong>Bin ${binIndex + 1}</strong><br>
+    binTitle.innerHTML = `<strong>Canvas ${binIndex + 1}</strong><br>
     Total Rectangles Area: ${binStats.itemsArea.toFixed(2)}<br>
     Waste Area: ${binStats.wasteArea.toFixed(2)}`;
     binContainerDiv.appendChild(binTitle);
@@ -392,7 +392,7 @@ document.addEventListener('DOMContentLoaded', function() {
       binDiv.style.marginBottom = '20px';
 
       const binTitle = document.createElement('div');
-      binTitle.innerHTML = `<strong>Bin ${index + 1}</strong><br>
+      binTitle.innerHTML = `<strong>Canvas ${index + 1}</strong><br>
       Total Rectangles Area: ${binStats.itemsArea.toFixed(2)}<br>
       Waste Area: ${binStats.wasteArea.toFixed(2)}`;
 
