@@ -59,9 +59,10 @@ document.addEventListener('DOMContentLoaded', function() {
     // Sort items by height descending (could adjust this)
     items.sort((a, b) => b.height - a.height);
 
-    // Initialize total areas
+    // Initialize totals
     let totalItemsArea = 0;
     let totalWasteArea = 0;
+    let totalBinArea = 0;
 
     const binsUsed = [];
 
@@ -129,6 +130,7 @@ document.addEventListener('DOMContentLoaded', function() {
       const binStats = selectedBin.binStats();
       totalItemsArea += binStats.itemsArea;
       totalWasteArea += binStats.wasteArea;
+      totalBinArea += binStats.area;
 
       binsUsed.push({
         bin: selectedBin,
@@ -138,6 +140,9 @@ document.addEventListener('DOMContentLoaded', function() {
       items = remainingItems; // Reassign items for the next iteration
     }
 
+    // Calculate waste percentage
+    const wastePercentage = (totalWasteArea / totalBinArea) * 100;
+
     // Display bins used
     binsUsed.forEach((binData, index) => {
       // Visualize the bin
@@ -145,11 +150,11 @@ document.addEventListener('DOMContentLoaded', function() {
       binContainer.appendChild(binDiv);
     });
 
-    // Display final tally
+    // Display final tally (now showing waste percentage)
     const finalTallyDiv = document.createElement('div');
     finalTallyDiv.innerHTML = `<h2>Final Tally for Shelf Algorithm</h2>
     Total Rectangles Area: ${totalItemsArea.toFixed(2)}<br>
-    Total Waste Area: ${totalWasteArea.toFixed(2)}`;
+    Waste Percentage: ${wastePercentage.toFixed(2)}%`;
     binContainer.appendChild(finalTallyDiv);
   }
 
@@ -160,16 +165,13 @@ document.addEventListener('DOMContentLoaded', function() {
     // Sort items in decreasing order of area (or any other heuristic)
     items.sort((a, b) => b.area - a.area);
 
-    // Initialize total areas
-    let totalItemsArea = items.reduce((acc, item) => acc + item.area, 0);
+    // Initialize totals
     let totalWasteArea = 0;
+    let totalBinArea = 0;
 
     const binsUsed = [];
 
     while (items.length > 0) {
-      // Recalculate totalItemsArea
-      totalItemsArea = items.reduce((acc, item) => acc + item.area, 0);
-
       let bestBinResult = null;
 
       // Try bins from largest to smallest
@@ -267,15 +269,19 @@ document.addEventListener('DOMContentLoaded', function() {
       items = remainingItems;
     }
 
+    // Calculate totals for Guillotine
+    const totalRectanglesArea = binsUsed.reduce((acc, binData) => acc + binData.binStats.itemsArea, 0);
+    totalBinArea = binsUsed.reduce((acc, binData) => acc + binData.binStats.area, 0);
+    const wastePercentage = totalBinArea > 0 ? (totalWasteArea / totalBinArea) * 100 : 0;
+
     // Display bins used
     displayBins(binsUsed, binContainer);
 
-    // Display final tally
+    // Display final tally (now showing waste percentage)
     const finalTallyDiv = document.createElement('div');
-    const totalRectanglesArea = binsUsed.reduce((acc, binData) => acc + binData.binStats.itemsArea, 0);
     finalTallyDiv.innerHTML = `<h2>Final Tally for Guillotine Algorithm</h2>
     Total Rectangles Area: ${totalRectanglesArea.toFixed(2)}<br>
-    Total Waste Area: ${totalWasteArea.toFixed(2)}`;
+    Waste Percentage: ${wastePercentage.toFixed(2)}%`;
     binContainer.appendChild(finalTallyDiv);
   }
 
@@ -367,7 +373,7 @@ document.addEventListener('DOMContentLoaded', function() {
       itemDimensionsDiv.style.padding = '1px 2px';
       itemDimensionsDiv.style.fontSize = '12px'; // Increased font size
       itemDimensionsDiv.style.textAlign = 'right';
-      itemDimensionsDiv.style.pointerEvents = 'none'; // So it doesn't interfere with any interactions
+      itemDimensionsDiv.style.pointerEvents = 'none';
       itemDimensionsDiv.innerHTML = `${item.originalWidth} x ${item.originalHeight}`;
 
       itemDiv.appendChild(itemDimensionsDiv);
