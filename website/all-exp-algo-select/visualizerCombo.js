@@ -5,12 +5,20 @@ let bladeThickness = 0; // Default blade thickness
 let allowRotation = true; // Set rotation preference
 
 document.addEventListener('DOMContentLoaded', function() {
-  // Reference to the bin container divs
+  // Reference to headers and containers
   const shelfBinContainer = document.getElementById('shelfBinContainer');
   const guillotineBinContainer = document.getElementById('guillotineBinContainer');
+  const shelfAlgoHeader = document.getElementById('shelfAlgoHeader');
+  const guillotineAlgoHeader = document.getElementById('guillotineAlgoHeader');
 
   // Function to process item data
   function processItemData(data) {
+    // Always reset visibility before running again
+    shelfAlgoHeader.style.display = '';
+    shelfBinContainer.style.display = '';
+    guillotineAlgoHeader.style.display = '';
+    guillotineBinContainer.style.display = '';
+
     // Get bin sizes
     const binSizes = [];
     const binSizeDivs = document.querySelectorAll('.bin-size');
@@ -48,11 +56,20 @@ document.addEventListener('DOMContentLoaded', function() {
     shelfBinContainer.innerHTML = '';
     guillotineBinContainer.innerHTML = '';
 
-    // Process items with Shelf Algorithm
-    processShelfAlgorithm(items.slice(), binSizes, shelfBinContainer);
+    // Process items with Shelf Algorithm and Guillotine Algorithm
+    const shelfWastePct = processShelfAlgorithm(items.slice(), binSizes, shelfBinContainer);
+    const guillotineWastePct = processGuillotineAlgorithm(items.slice(), binSizes, guillotineBinContainer);
 
-    // Process items with Guillotine Algorithm
-    processGuillotineAlgorithm(items.slice(), binSizes, guillotineBinContainer);
+    // Compare waste percentages and hide the one that is worse
+    if (shelfWastePct < guillotineWastePct) {
+      // Shelf is better, hide Guillotine
+      guillotineAlgoHeader.style.display = 'none';
+      guillotineBinContainer.style.display = 'none';
+    } else {
+      // Guillotine is better or they are equal, hide Shelf
+      shelfAlgoHeader.style.display = 'none';
+      shelfBinContainer.style.display = 'none';
+    }
   }
 
   function processShelfAlgorithm(items, binSizes, binContainer) {
@@ -141,7 +158,7 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 
     // Calculate waste percentage
-    const wastePercentage = (totalWasteArea / totalBinArea) * 100;
+    const wastePercentage = totalBinArea > 0 ? (totalWasteArea / totalBinArea) * 100 : 0;
 
     // Display bins used
     binsUsed.forEach((binData, index) => {
@@ -156,6 +173,8 @@ document.addEventListener('DOMContentLoaded', function() {
     Total Rectangles Area: ${totalItemsArea.toFixed(2)}<br>
     Waste Percentage: ${wastePercentage.toFixed(2)}%`;
     binContainer.appendChild(finalTallyDiv);
+
+    return wastePercentage;
   }
 
   function processGuillotineAlgorithm(items, binSizes, binContainer) {
@@ -189,7 +208,6 @@ document.addEventListener('DOMContentLoaded', function() {
           continue;
         }
 
-        // Create a new bin with the current bin size
         const tempBin = new GuillotineBin({
           binWidth: binSize.binWidth,
           binHeight: binSize.binHeight,
@@ -200,7 +218,6 @@ document.addEventListener('DOMContentLoaded', function() {
           splitHeuristic: 'default',
         });
 
-        // Keep track of which items are packed
         const packedItemIndices = [];
 
         for (let index = 0; index < items.length; index++) {
@@ -214,7 +231,6 @@ document.addEventListener('DOMContentLoaded', function() {
         const numItemsPacked = packedItemIndices.length;
         const wasteArea = tempBin.binStats().wasteArea;
 
-        // Check if this bin size packs more items than previous best
         if (!bestBinResult || numItemsPacked > bestBinResult.numItemsPacked ||
             (numItemsPacked === bestBinResult.numItemsPacked && wasteArea < bestBinResult.wasteArea)) {
           bestBinResult = {
@@ -232,7 +248,6 @@ document.addEventListener('DOMContentLoaded', function() {
         break;
       }
 
-      // Now, create the actual bin and pack the items
       const selectedBin = new GuillotineBin({
         binWidth: bestBinResult.binSize.binWidth,
         binHeight: bestBinResult.binSize.binHeight,
@@ -246,7 +261,6 @@ document.addEventListener('DOMContentLoaded', function() {
       const remainingItems = [];
       const packedItems = [];
 
-      // Reset items to original dimensions before inserting
       items.forEach(item => item.reset());
 
       for (let index = 0; index < items.length; index++) {
@@ -262,36 +276,31 @@ document.addEventListener('DOMContentLoaded', function() {
       const binStats = selectedBin.binStats();
       binsUsed.push({ bin: selectedBin, binSize: bestBinResult.binSize, binStats });
 
-      // Accumulate areas
       totalWasteArea += binStats.wasteArea;
 
-      // Update items list
       items = remainingItems;
     }
 
-    // Calculate totals for Guillotine
     const totalRectanglesArea = binsUsed.reduce((acc, binData) => acc + binData.binStats.itemsArea, 0);
     totalBinArea = binsUsed.reduce((acc, binData) => acc + binData.binStats.area, 0);
     const wastePercentage = totalBinArea > 0 ? (totalWasteArea / totalBinArea) * 100 : 0;
 
-    // Display bins used
     displayBins(binsUsed, binContainer);
 
-    // Display final tally (now showing waste percentage)
     const finalTallyDiv = document.createElement('div');
     finalTallyDiv.innerHTML = `<h2>Final Tally for Guillotine Algorithm</h2>
     Total Rectangles Area: ${totalRectanglesArea.toFixed(2)}<br>
     Waste Percentage: ${wastePercentage.toFixed(2)}%`;
     binContainer.appendChild(finalTallyDiv);
+
+    return wastePercentage;
   }
 
-  // Function to create bin visualization
   function createBinDiv(bin, binIndex, binStats) {
     const binContainerDiv = document.createElement('div');
     binContainerDiv.className = 'bin-container';
     binContainerDiv.style.marginBottom = '20px';
 
-    // Create a div to hold the bin number and areas
     const binTitle = document.createElement('div');
     binTitle.innerHTML = `<strong>Canvas ${binIndex + 1}</strong><br>
     Total Rectangles Area: ${binStats.itemsArea.toFixed(2)}<br>
@@ -305,73 +314,62 @@ document.addEventListener('DOMContentLoaded', function() {
     binDiv.style.position = 'relative';
     binDiv.style.border = '1px solid black';
     binDiv.style.margin = '10px 0';
-    binDiv.style.backgroundColor = 'red'; // Waste area is red
-    binDiv.style.overflow = 'hidden'; // Prevent items from extending beyond the bin
+    binDiv.style.backgroundColor = 'red';
+    binDiv.style.overflow = 'hidden';
 
-    // Add dimensions inside the bin
     const dimensionsDiv = document.createElement('div');
     dimensionsDiv.style.position = 'absolute';
     dimensionsDiv.style.bottom = '5px';
     dimensionsDiv.style.right = '5px';
     dimensionsDiv.style.backgroundColor = 'rgba(255, 255, 255, 0.7)';
     dimensionsDiv.style.padding = '2px 4px';
-    dimensionsDiv.style.fontSize = '14px'; // Increased font size
+    dimensionsDiv.style.fontSize = '14px';
     dimensionsDiv.innerHTML = `${bin.binWidth} x ${bin.binHeight}`;
     binDiv.appendChild(dimensionsDiv);
 
-    // Add items
     bin.items.forEach(item => {
       const itemDiv = document.createElement('div');
       itemDiv.className = 'item';
       itemDiv.style.width = `${item.width * SCALE}px`;
       itemDiv.style.height = `${item.height * SCALE}px`;
-      itemDiv.style.backgroundColor = 'green'; // Used wood is green
+      itemDiv.style.backgroundColor = 'green';
       itemDiv.style.position = 'absolute';
       itemDiv.style.left = `${item.x * SCALE}px`;
       itemDiv.style.top = `${item.y * SCALE}px`;
       itemDiv.style.boxSizing = 'border-box';
 
       if (bladeThickness > 0) {
-        // Determine which shadows to apply based on item's position
         const shadows = [];
-
         const bladePx = bladeThickness * SCALE;
 
-        // If item is not at the top edge of the bin, apply top shadow
         if (item.y > 0) {
           shadows.push(`inset 0 ${bladePx}px 0 -${bladePx}px black`);
         }
 
-        // If item is not at the bottom edge of the bin, apply bottom shadow
         if (item.y + item.height + bladeThickness < bin.binHeight) {
           shadows.push(`inset 0 -${bladePx}px 0 -${bladePx}px black`);
         }
 
-        // If item is not at the left edge of the bin, apply left shadow
         if (item.x > 0) {
           shadows.push(`inset ${bladePx}px 0 0 -${bladePx}px black`);
         }
 
-        // If item is not at the right edge of the bin, apply right shadow
         if (item.x + item.width + bladeThickness < bin.binWidth) {
           shadows.push(`inset -${bladePx}px 0 0 -${bladePx}px black`);
         }
 
-        // Apply the box-shadow styles
         itemDiv.style.boxShadow = shadows.join(', ');
       } else {
-        // No blade thickness, so no shadows
         itemDiv.style.boxShadow = 'none';
       }
 
-      // Add dimensions inside the item
       const itemDimensionsDiv = document.createElement('div');
       itemDimensionsDiv.style.position = 'absolute';
       itemDimensionsDiv.style.bottom = '2px';
       itemDimensionsDiv.style.right = '2px';
       itemDimensionsDiv.style.backgroundColor = 'rgba(255, 255, 255, 0.7)';
       itemDimensionsDiv.style.padding = '1px 2px';
-      itemDimensionsDiv.style.fontSize = '12px'; // Increased font size
+      itemDimensionsDiv.style.fontSize = '12px';
       itemDimensionsDiv.style.textAlign = 'right';
       itemDimensionsDiv.style.pointerEvents = 'none';
       itemDimensionsDiv.innerHTML = `${item.originalWidth} x ${item.originalHeight}`;
@@ -385,14 +383,12 @@ document.addEventListener('DOMContentLoaded', function() {
     return binContainerDiv;
   }
 
-  // Function to display bins for Guillotine Algorithm
   function displayBins(bins, binContainer) {
     bins.forEach((binData, index) => {
       const bin = binData.bin;
       const binSize = binData.binSize;
       const binStats = bin.binStats();
 
-      // Create a container for the bin visualization
       const binDiv = document.createElement('div');
       binDiv.className = 'bin-container';
       binDiv.style.marginBottom = '20px';
@@ -404,7 +400,6 @@ document.addEventListener('DOMContentLoaded', function() {
 
       binDiv.appendChild(binTitle);
 
-      // Create a canvas for each bin
       const binCanvas = document.createElement('div');
       binCanvas.className = 'bin';
       binCanvas.style.width = `${bin.binWidth * SCALE}px`;
@@ -412,73 +407,62 @@ document.addEventListener('DOMContentLoaded', function() {
       binCanvas.style.position = 'relative';
       binCanvas.style.border = '1px solid black';
       binCanvas.style.margin = '10px 0';
-      binCanvas.style.backgroundColor = 'red'; // Waste area is red
-      binCanvas.style.overflow = 'hidden'; // Prevent items from extending beyond the bin
+      binCanvas.style.backgroundColor = 'red';
+      binCanvas.style.overflow = 'hidden';
 
-      // Add dimensions inside the bin
       const dimensionsDiv = document.createElement('div');
       dimensionsDiv.style.position = 'absolute';
       dimensionsDiv.style.bottom = '5px';
       dimensionsDiv.style.right = '5px';
       dimensionsDiv.style.backgroundColor = 'rgba(255, 255, 255, 0.7)';
       dimensionsDiv.style.padding = '2px 4px';
-      dimensionsDiv.style.fontSize = '14px'; // Increased font size
+      dimensionsDiv.style.fontSize = '14px';
       dimensionsDiv.innerHTML = `${bin.binWidth} x ${bin.binHeight}`;
       binCanvas.appendChild(dimensionsDiv);
 
-      // Add items
       bin.items.forEach(item => {
         const itemDiv = document.createElement('div');
         itemDiv.className = 'item';
         itemDiv.style.width = `${item.width * SCALE}px`;
         itemDiv.style.height = `${item.height * SCALE}px`;
-        itemDiv.style.backgroundColor = 'green'; // Used wood is green
+        itemDiv.style.backgroundColor = 'green';
         itemDiv.style.position = 'absolute';
         itemDiv.style.left = `${item.x * SCALE}px`;
         itemDiv.style.top = `${item.y * SCALE}px`;
         itemDiv.style.boxSizing = 'border-box';
 
         if (bladeThickness > 0) {
-          // Determine which shadows to apply based on item's position
           const shadows = [];
-
           const bladePx = bladeThickness * SCALE;
 
-          // If item is not at the top edge of the bin, apply top shadow
           if (item.y > 0) {
             shadows.push(`inset 0 ${bladePx}px 0 -${bladePx}px black`);
           }
 
-          // If item is not at the bottom edge of the bin, apply bottom shadow
           if (item.y + item.height + bladeThickness < bin.binHeight) {
             shadows.push(`inset 0 -${bladePx}px 0 -${bladePx}px black`);
           }
 
-          // If item is not at the left edge of the bin, apply left shadow
           if (item.x > 0) {
             shadows.push(`inset ${bladePx}px 0 0 -${bladePx}px black`);
           }
 
-          // If item is not at the right edge of the bin, apply right shadow
           if (item.x + item.width + bladeThickness < bin.binWidth) {
             shadows.push(`inset -${bladePx}px 0 0 -${bladePx}px black`);
           }
 
-          // Apply the box-shadow styles
           itemDiv.style.boxShadow = shadows.join(', ');
         } else {
-          // No blade thickness, so no shadows
           itemDiv.style.boxShadow = 'none';
         }
 
-        // Add dimensions inside the item
         const itemDimensionsDiv = document.createElement('div');
         itemDimensionsDiv.style.position = 'absolute';
         itemDimensionsDiv.style.bottom = '2px';
         itemDimensionsDiv.style.right = '2px';
         itemDimensionsDiv.style.backgroundColor = 'rgba(255, 255, 255, 0.7)';
         itemDimensionsDiv.style.padding = '1px 2px';
-        itemDimensionsDiv.style.fontSize = '12px'; // Increased font size
+        itemDimensionsDiv.style.fontSize = '12px';
         itemDimensionsDiv.style.textAlign = 'right';
         itemDimensionsDiv.style.pointerEvents = 'none';
         itemDimensionsDiv.innerHTML = `${item.originalWidth} x ${item.originalHeight}`;
@@ -493,8 +477,6 @@ document.addEventListener('DOMContentLoaded', function() {
   }
 
   // Event Listeners:
-
-  // Add event listener to "Add Bin Size" button
   const addBinSizeButton = document.getElementById('addBinSize');
   addBinSizeButton.addEventListener('click', function() {
     const binSizesDiv = document.getElementById('binSizes');
@@ -509,14 +491,12 @@ document.addEventListener('DOMContentLoaded', function() {
     `;
     binSizesDiv.appendChild(newBinSizeDiv);
 
-    // Add event listener for the remove button
     const removeButton = newBinSizeDiv.querySelector('.removeBinSize');
     removeButton.addEventListener('click', function() {
       binSizesDiv.removeChild(newBinSizeDiv);
     });
   });
 
-  // Add event listeners to existing remove buttons
   document.querySelectorAll('.removeBinSize').forEach(button => {
     button.addEventListener('click', function() {
       const binSizeDiv = this.parentElement;
@@ -540,7 +520,6 @@ document.addEventListener('DOMContentLoaded', function() {
     `;
     itemList.appendChild(newItemDiv);
 
-    // Add event listener for the remove button
     const removeButton = newItemDiv.querySelector('.removeItemButton');
     removeButton.addEventListener('click', function() {
       itemList.removeChild(newItemDiv);
@@ -553,9 +532,7 @@ document.addEventListener('DOMContentLoaded', function() {
   loadButton.addEventListener('click', function () {
     const file = fileInput.files[0];
     if (file) {
-      // Handle file input
       const reader = new FileReader();
-
       reader.onload = function (e) {
         try {
           const jsonData = JSON.parse(e.target.result);
@@ -564,18 +541,14 @@ document.addEventListener('DOMContentLoaded', function() {
           alert('Error parsing JSON file: ' + error.message);
         }
       };
-
       reader.readAsText(file);
     } else {
-      // No file selected, process manual items
       const jsonData = [];
-
       const itemEntries = document.querySelectorAll('.item-entry');
       itemEntries.forEach(entry => {
         const width = parseFloat(entry.querySelector('.itemWidth').value);
         const height = parseFloat(entry.querySelector('.itemHeight').value);
         const quantity = parseInt(entry.querySelector('.itemQuantity').value) || 1;
-
         if (width && height) {
           jsonData.push({ width, height, quantity });
         }
@@ -593,13 +566,11 @@ document.addEventListener('DOMContentLoaded', function() {
   const saveToJsonButton = document.getElementById('saveToJsonButton');
   saveToJsonButton.addEventListener('click', function() {
     const jsonData = [];
-
     const itemEntries = document.querySelectorAll('.item-entry');
     itemEntries.forEach(entry => {
       const width = parseFloat(entry.querySelector('.itemWidth').value);
       const height = parseFloat(entry.querySelector('.itemHeight').value);
       const quantity = parseInt(entry.querySelector('.itemQuantity').value) || 1;
-
       if (width && height) {
         jsonData.push({ width, height, quantity });
       }
@@ -618,8 +589,6 @@ document.addEventListener('DOMContentLoaded', function() {
     link.href = url;
     link.download = 'items.json';
     link.click();
-
-    // Optionally, revoke the object URL after download
     URL.revokeObjectURL(url);
   });
 
