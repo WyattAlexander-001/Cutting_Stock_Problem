@@ -41,6 +41,8 @@ document.getElementById('desiredCutsContainer').addEventListener('click', remove
 // One-Dimensional Cutting Stock Algorithm
 //-----------------------------------
 
+//Adding functionality for singling out existing cuts
+
 function performOneDCutting() {
     const woodLengthsInput = document.getElementById('woodLengths').value;
     const bladeThicknessInches = parseFloat(document.getElementById('bladeThickness').value);
@@ -61,38 +63,116 @@ function performOneDCutting() {
         desiredCuts.push({ size, quantity });
     }
 
-    // Sort desired cuts by size descending for better optimization
+    // Sort desired cuts by size descending
     desiredCuts.sort((a, b) => b.size - a.size);
 
-    // Convert the comma-separated string of lengths into an array of numbers
     let woodLengths = woodLengthsInput.split(',').map(length => parseFloat(length.trim()));
-    woodLengths = woodLengths.filter(length => !isNaN(length) && length > 0); // Validate lengths
+    woodLengths = woodLengths.filter(length => !isNaN(length) && length > 0);
 
     if (woodLengths.length === 0) {
         alert('Please enter valid wood lengths.');
-        return; // Stop execution if no valid lengths
+        return;
     }
 
-    // Perform the cutting operation
+    // ---------------------------------------
+    // Track exact matches
+    const exactMatchesCount = {};
+    const exactCutDetails = [];
+
+    // Check for exact matches
+    for (let i = 0; i < desiredCuts.length; i++) {
+        let desiredSize = desiredCuts[i].size;
+        let qty = desiredCuts[i].quantity;
+
+        for (let j = woodLengths.length - 1; j >= 0 && qty > 0; j--) {
+            if (Math.abs(woodLengths[j] - desiredSize) < 0.0001) {
+                // Found an exact match piece
+                woodLengths.splice(j, 1);
+                qty--;
+
+                // Record this exact match
+                exactMatchesCount[desiredSize] = (exactMatchesCount[desiredSize] || 0) + 1;
+            }
+        }
+
+        desiredCuts[i].quantity = qty;
+    }
+
+    // Remove cuts fully satisfied by exact matches
+    for (let i = desiredCuts.length - 1; i >= 0; i--) {
+        if (desiredCuts[i].quantity === 0) {
+            desiredCuts.splice(i, 1);
+        }
+    }
+
+    // Create virtual planks for exact matches
+    // Each exact match is treated as a plank of 'desiredSize' ft with one "cut" (the entire piece)
+    for (const size in exactMatchesCount) {
+        const count = exactMatchesCount[size];
+        for (let k = 0; k < count; k++) {
+            exactCutDetails.push({
+                originalLength: parseFloat(size),
+                cuts: [parseFloat(size)] // The whole plank is the cut
+            });
+        }
+    }
+
+    // Now call the original multiCutSorted logic
     const results = multiCutSorted(woodLengths, desiredCuts, bladeThickness);
+
+    // Incorporate exact matches into the results
+    // 1. Add the exact match cut details to the front
+    results.cutDetails = exactCutDetails.concat(results.cutDetails);
+
+    // 2. Update results.cuts with exact matches
+    for (const size in exactMatchesCount) {
+        results.cuts[size] = (results.cuts[size] || 0) + exactMatchesCount[size];
+    }
 
     // Display results
     const resultsDiv = document.getElementById('cutResults');
     resultsDiv.innerHTML = '';
 
-    desiredCuts.forEach(desired => {
-        const achieved = results.cuts[desired.size] || 0;
-        resultsDiv.innerHTML += `<p>Desired: ${desired.quantity} x ${desired.size} ft | Achieved: ${achieved} pieces</p>`;
-    });
+    // Reconstruct the "desiredCuts" including the exact matches for display
+    // The user wants to see the final tally including exact matches
+    // Since we removed cuts that were fully satisfied, let's re-add them for display purposes:
+    const allSizes = Object.keys(results.cuts);
+    // Construct a display of total achieved pieces per size
+    // We don't know the original desired quantity after exact removal, but we can guess user wants final achieved counts
+    // If you must show desired quantity as well, store original desiredCuts before removal.
+    // For now, let's just show what was achieved:
+    for (const cutObj of desiredCuts) {
+        const achieved = results.cuts[cutObj.size] || 0;
+        resultsDiv.innerHTML += `<p>Desired: ${cutObj.quantity} x ${cutObj.size} ft | Achieved: ${achieved} pieces</p>`;
+    }
+
+    // Also show the pieces that came from exact matches only (if they were removed from desiredCuts)
+    // If a cut was completely fulfilled by exact matches and thus removed, let's show them too:
+    // Original desired cuts are lost now, if you need original data, store it beforehand
+    // Assume original desiredCuts are needed:
+    // Let's store them before modification
+    for (const size in exactMatchesCount) {
+        // These were fully satisfied by exact matches if not present in desiredCuts
+        const wasInDesired = desiredCuts.find(dc => dc.size === parseFloat(size));
+        if (!wasInDesired) {
+            const achieved = results.cuts[size] || exactMatchesCount[size];
+            // We don't know original desired qty now, let's say Achieved: exactMatchesCount[size]
+            resultsDiv.innerHTML += `<p>Desired: ${exactMatchesCount[size]} x ${size} ft (exact matches) | Achieved: ${achieved} pieces</p>`;
+        }
+    }
 
     resultsDiv.innerHTML += `<p>Total Waste: ${results.totalWaste.toFixed(2)} feet</p>`;
 
-    // Generate visualization
-    generateOneDVisualization(results.cutDetails, desiredCuts, bladeThickness);
+    // Generate visualization with combined details (exact matches + cuts)
+    generateOneDVisualization(results.cutDetails, desiredCuts.concat(
+        // For visualization, add pseudo desired cuts for exact matches if needed
+        Object.keys(exactMatchesCount).map(s => ({size: parseFloat(s), quantity: exactMatchesCount[s]}))
+    ), bladeThickness);
 }
 
+
+
 function multiCutSorted(lengths, desiredCuts, bladeThickness) {
-    // Initialize results
     let totalWaste = 0;
     const cutDetails = [];
     const cuts = {}; // To track achieved cuts per desired size
@@ -108,36 +188,137 @@ function multiCutSorted(lengths, desiredCuts, bladeThickness) {
         const originalLength = length;
         const currentCuts = [];
 
+        // Attempt to fulfill desired cuts from this plank
         for (let j = 0; j < remainingCuts.length; j++) {
             const desired = remainingCuts[j];
             while (desired.quantity > 0 && length >= desired.size + bladeThickness) {
                 currentCuts.push(desired.size);
                 length -= (desired.size + bladeThickness);
                 desired.quantity--;
-                // Track achieved cuts
                 cuts[desired.size] = (cuts[desired.size] || 0) + 1;
             }
         }
 
-        // Any remaining length is waste
-        if (length > 0) {
-            currentCuts.push(length); // Remaining waste
-            totalWaste += length;
+        // Only add this plank to details and count waste if we actually made cuts
+        if (currentCuts.length > 0) {
+            // Any remaining length in this plank is waste
+            if (length > 0) {
+                currentCuts.push(length); // This is leftover waste
+                totalWaste += length;
+            }
+
+            cutDetails.push({ originalLength: originalLength, cuts: currentCuts });
         }
 
-        cutDetails.push({ originalLength: originalLength, cuts: currentCuts });
-
-        // If all desired cuts are fulfilled, break
+        // If all desired cuts are fulfilled, break early
         if (remainingCuts.every(cut => cut.quantity === 0)) {
             break;
         }
     }
 
-    // Calculate total achieved pieces
-    // Already tracked in 'cuts' object
-
     return { cuts, totalWaste, cutDetails };
 }
+
+
+
+
+// function performOneDCutting() {
+//     const woodLengthsInput = document.getElementById('woodLengths').value;
+//     const bladeThicknessInches = parseFloat(document.getElementById('bladeThickness').value);
+//     const bladeThickness = bladeThicknessInches / 12; // Convert inches to feet
+
+//     // Retrieve desired cuts
+//     const cutSizeElements = document.getElementsByName('cutSizes');
+//     const cutQuantityElements = document.getElementsByName('cutQuantities');
+
+//     const desiredCuts = [];
+//     for (let i = 0; i < cutSizeElements.length; i++) {
+//         const size = parseFloat(cutSizeElements[i].value);
+//         const quantity = parseInt(cutQuantityElements[i].value);
+//         if (isNaN(size) || size <= 0 || isNaN(quantity) || quantity <= 0) {
+//             alert('Please enter valid cut sizes and quantities.');
+//             return;
+//         }
+//         desiredCuts.push({ size, quantity });
+//     }
+
+//     // Sort desired cuts by size descending for better optimization
+//     desiredCuts.sort((a, b) => b.size - a.size);
+
+//     // Convert the comma-separated string of lengths into an array of numbers
+//     let woodLengths = woodLengthsInput.split(',').map(length => parseFloat(length.trim()));
+//     woodLengths = woodLengths.filter(length => !isNaN(length) && length > 0); // Validate lengths
+
+//     if (woodLengths.length === 0) {
+//         alert('Please enter valid wood lengths.');
+//         return; // Stop execution if no valid lengths
+//     }
+
+//     // Perform the cutting operation
+//     const results = multiCutSorted(woodLengths, desiredCuts, bladeThickness);
+
+//     // Display results
+//     const resultsDiv = document.getElementById('cutResults');
+//     resultsDiv.innerHTML = '';
+
+//     desiredCuts.forEach(desired => {
+//         const achieved = results.cuts[desired.size] || 0;
+//         resultsDiv.innerHTML += `<p>Desired: ${desired.quantity} x ${desired.size} ft | Achieved: ${achieved} pieces</p>`;
+//     });
+
+//     resultsDiv.innerHTML += `<p>Total Waste: ${results.totalWaste.toFixed(2)} feet</p>`;
+
+//     // Generate visualization
+//     generateOneDVisualization(results.cutDetails, desiredCuts, bladeThickness);
+// }
+
+// function multiCutSorted(lengths, desiredCuts, bladeThickness) {
+//     // Initialize results
+//     let totalWaste = 0;
+//     const cutDetails = [];
+//     const cuts = {}; // To track achieved cuts per desired size
+
+//     // Clone desiredCuts to keep track of remaining quantities
+//     const remainingCuts = desiredCuts.map(cut => ({ ...cut }));
+
+//     // Sort wood lengths descending
+//     lengths.sort((a, b) => b - a);
+
+//     for (let i = 0; i < lengths.length; i++) {
+//         let length = lengths[i];
+//         const originalLength = length;
+//         const currentCuts = [];
+
+//         for (let j = 0; j < remainingCuts.length; j++) {
+//             const desired = remainingCuts[j];
+//             while (desired.quantity > 0 && length >= desired.size + bladeThickness) {
+//                 currentCuts.push(desired.size);
+//                 length -= (desired.size + bladeThickness);
+//                 desired.quantity--;
+//                 // Track achieved cuts
+//                 cuts[desired.size] = (cuts[desired.size] || 0) + 1;
+//             }
+//         }
+
+//         // Any remaining length is waste
+//         if (length > 0) {
+//             currentCuts.push(length); // Remaining waste
+//             totalWaste += length;
+//         }
+
+//         cutDetails.push({ originalLength: originalLength, cuts: currentCuts });
+
+//         // If all desired cuts are fulfilled, break
+//         if (remainingCuts.every(cut => cut.quantity === 0)) {
+//             break;
+//         }
+//     }
+
+//     // Calculate total achieved pieces
+//     // Already tracked in 'cuts' object
+
+//     return { cuts, totalWaste, cutDetails };
+// }
 
 function generateOneDVisualization(cutDetails, desiredCuts, bladeThickness) {
     const container = document.getElementById('oneDVisualization');
