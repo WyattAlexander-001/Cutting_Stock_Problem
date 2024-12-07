@@ -80,6 +80,8 @@ function performOneDCutting() {
     const exactCutDetails = [];
 
     // Check for exact matches
+    const originalDesiredCuts = desiredCuts.map(dc => ({ ...dc })); // Keep a copy for final display reference
+
     for (let i = 0; i < desiredCuts.length; i++) {
         let desiredSize = desiredCuts[i].size;
         let qty = desiredCuts[i].quantity;
@@ -106,7 +108,6 @@ function performOneDCutting() {
     }
 
     // Create virtual planks for exact matches
-    // Each exact match is treated as a plank of 'desiredSize' ft with one "cut" (the entire piece)
     for (const size in exactMatchesCount) {
         const count = exactMatchesCount[size];
         for (let k = 0; k < count; k++) {
@@ -133,42 +134,49 @@ function performOneDCutting() {
     const resultsDiv = document.getElementById('cutResults');
     resultsDiv.innerHTML = '';
 
-    // Reconstruct the "desiredCuts" including the exact matches for display
-    // The user wants to see the final tally including exact matches
-    // Since we removed cuts that were fully satisfied, let's re-add them for display purposes:
-    const allSizes = Object.keys(results.cuts);
-    // Construct a display of total achieved pieces per size
-    // We don't know the original desired quantity after exact removal, but we can guess user wants final achieved counts
-    // If you must show desired quantity as well, store original desiredCuts before removal.
-    // For now, let's just show what was achieved:
-    for (const cutObj of desiredCuts) {
-        const achieved = results.cuts[cutObj.size] || 0;
-        resultsDiv.innerHTML += `<p>Desired: ${cutObj.quantity} x ${cutObj.size} ft | Achieved: ${achieved} pieces</p>`;
+    // Combine current desiredCuts with original so we can show all
+    const allDesired = {};
+    for (const dc of originalDesiredCuts) {
+        allDesired[dc.size] = dc.quantity;
+    }
+    // If we removed any cuts due to exact matches, add them back with original quantity
+    for (const size in exactMatchesCount) {
+        if (!allDesired[size]) {
+            // This means it was fully satisfied by exact matches originally
+            allDesired[size] = exactMatchesCount[size]; 
+        }
     }
 
-    // Also show the pieces that came from exact matches only (if they were removed from desiredCuts)
-    // If a cut was completely fulfilled by exact matches and thus removed, let's show them too:
-    // Original desired cuts are lost now, if you need original data, store it beforehand
-    // Assume original desiredCuts are needed:
-    // Let's store them before modification
-    for (const size in exactMatchesCount) {
-        // These were fully satisfied by exact matches if not present in desiredCuts
-        const wasInDesired = desiredCuts.find(dc => dc.size === parseFloat(size));
-        if (!wasInDesired) {
-            const achieved = results.cuts[size] || exactMatchesCount[size];
-            // We don't know original desired qty now, let's say Achieved: exactMatchesCount[size]
-            resultsDiv.innerHTML += `<p>Desired: ${exactMatchesCount[size]} x ${size} ft (exact matches) | Achieved: ${achieved} pieces</p>`;
+    // Now display each desired size
+    for (const size in allDesired) {
+        const desiredQty = allDesired[size];
+        const achieved = results.cuts[size] || 0;
+
+        if (achieved < desiredQty) {
+            // Not enough wood
+            const neededMore = (desiredQty - achieved) * parseFloat(size);
+            resultsDiv.innerHTML += `<p style="color:red;">Desired: ${desiredQty} x ${size} ft | Achieved: ${achieved} pieces | Need more wood: ~${neededMore.toFixed(2)} ft required!</p>`;
+        } else {
+            // Enough or exact
+            // If these were exact matches only, add a note
+            const wasExactOnly = exactMatchesCount[size] && !desiredCuts.find(d => d.size === parseFloat(size));
+            const extraNote = wasExactOnly ? ' (exact matches)' : '';
+            resultsDiv.innerHTML += `<p>Desired: ${desiredQty} x ${size} ft${extraNote} | Achieved: ${achieved} pieces</p>`;
         }
     }
 
     resultsDiv.innerHTML += `<p>Total Waste: ${results.totalWaste.toFixed(2)} feet</p>`;
 
     // Generate visualization with combined details (exact matches + cuts)
-    generateOneDVisualization(results.cutDetails, desiredCuts.concat(
-        // For visualization, add pseudo desired cuts for exact matches if needed
-        Object.keys(exactMatchesCount).map(s => ({size: parseFloat(s), quantity: exactMatchesCount[s]}))
-    ), bladeThickness);
+    // For visualization, reconstruct "desiredCuts" for input into generateOneDVisualization
+    const finalDesired = [];
+    for (const size in allDesired) {
+        finalDesired.push({size: parseFloat(size), quantity: allDesired[size]});
+    }
+
+    generateOneDVisualization(results.cutDetails, finalDesired, bladeThickness);
 }
+
 
 
 
