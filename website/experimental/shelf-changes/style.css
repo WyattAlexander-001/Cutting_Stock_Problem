@@ -1,0 +1,31 @@
+body {
+    font-family: Arial, sans-serif;
+    background-color: gold;
+}
+
+#container {
+    position: relative;
+    width: 800px; 
+    height: 400px; 
+    background-color: red; /* Canvas background */
+    border: 1px solid black;
+}
+
+.bin {
+    box-sizing: border-box;
+    position: absolute;
+    border: 2px solid black;
+    background-color: green;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white; /* Ensuring text is visible on green background */
+    font-size: 12px; 
+    
+}
+
+#usageDiv {
+    background-color: red;
+    margin: auto;
+    color: white;
+}
