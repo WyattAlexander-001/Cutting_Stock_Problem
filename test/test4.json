@@ -1,0 +1,14 @@
+[
+    {"width": 9, "height": 8, "quantity": 2},
+    {"width": 12, "height": 3, "quantity": 2},
+    {"width": 8, "height": 8, "quantity": 1},
+    {"width": 2, "height": 3, "quantity": 2},
+    {"width": 2, "height": 2, "quantity": 6},
+    {"width": 6, "height": 4, "quantity": 4},
+    {"width": 2, "height": 8, "quantity": 2},
+    {"width": 4, "height": 9, "quantity": 1},
+    {"width": 4, "height": 8, "quantity": 3},
+    {"width": 2, "height": 6, "quantity": 3},
+    {"width": 4, "height": 5, "quantity": 5},
+    {"width": 10, "height": 4, "quantity": 3}
+]

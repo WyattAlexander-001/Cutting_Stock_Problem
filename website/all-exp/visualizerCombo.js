@@ -486,6 +486,17 @@ document.addEventListener('DOMContentLoaded', function() {
     });
   }
 
+  if (typeof module !== 'undefined' && module.exports) {
+    module.exports = {
+      processItemData,
+      processGuillotineAlgorithm,
+      processShelfAlgorithm,
+      SCALE,
+      bladeThickness,
+      allowRotation
+    };
+  }  
+
   // Event Listeners:
 
   // Add event listener to "Add Bin Size" button
