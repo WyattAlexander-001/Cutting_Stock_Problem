@@ -11,6 +11,14 @@ body {
     border: 1px solid black;
 }
 
+#canvas {
+    position: relative;
+    width: 800px; 
+    height: 400px; 
+    background-color: red; /* Canvas background */
+    border: 1px solid black;
+}
+
 .bin {
     box-sizing: border-box;
     position: absolute;

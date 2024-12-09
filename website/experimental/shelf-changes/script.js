@@ -107,8 +107,9 @@ document.addEventListener("DOMContentLoaded", function () {
       const quantity =
         parseInt(entry.querySelector(".itemQuantity").value) || 1;
 
+      // Empty if statement here to make it easier for me to read :)
       if (width && height) {
-        //
+        // Everything is good, continue
       } else {
         // Improper input, oops
         alert("An item was not entered correctly, items need width and height");
