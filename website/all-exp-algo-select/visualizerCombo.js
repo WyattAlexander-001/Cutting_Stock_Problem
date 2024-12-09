@@ -35,8 +35,8 @@ document.addEventListener('DOMContentLoaded', function() {
       return;
     }
 
-    // Get blade thickness
-    const bladeThicknessInput = document.getElementById('bladeThickness');
+    // Get blade thickness for bin packing
+    const bladeThicknessInput = document.getElementById('binBladeThickness');
     if (bladeThicknessInput) {
       bladeThickness = parseFloat(bladeThicknessInput.value) || 0;
     } else {
@@ -124,7 +124,6 @@ document.addEventListener('DOMContentLoaded', function() {
         break;
       }
 
-      // Now, create the actual bin and pack the items
       const selectedBin = new ShelfBin({
         binWidth: bestBinResult.binSize.binWidth,
         binHeight: bestBinResult.binSize.binHeight,
@@ -157,17 +156,13 @@ document.addEventListener('DOMContentLoaded', function() {
       items = remainingItems; // Reassign items for the next iteration
     }
 
-    // Calculate waste percentage
     const wastePercentage = totalBinArea > 0 ? (totalWasteArea / totalBinArea) * 100 : 0;
 
-    // Display bins used
     binsUsed.forEach((binData, index) => {
-      // Visualize the bin
       const binDiv = createBinDiv(binData.bin, index, binData.binStats);
       binContainer.appendChild(binDiv);
     });
 
-    // Display final tally (now showing waste percentage)
     const finalTallyDiv = document.createElement('div');
     finalTallyDiv.innerHTML = `<h2>Final Tally for Shelf Algorithm</h2>
     Total Rectangles Area: ${totalItemsArea.toFixed(2)}<br>
@@ -178,13 +173,9 @@ document.addEventListener('DOMContentLoaded', function() {
   }
 
   function processGuillotineAlgorithm(items, binSizes, binContainer) {
-    // Sort binSizes by area descending
     binSizes.sort((a, b) => b.area - a.area);
-
-    // Sort items in decreasing order of area (or any other heuristic)
     items.sort((a, b) => b.area - a.area);
 
-    // Initialize totals
     let totalWasteArea = 0;
     let totalBinArea = 0;
 
@@ -193,9 +184,7 @@ document.addEventListener('DOMContentLoaded', function() {
     while (items.length > 0) {
       let bestBinResult = null;
 
-      // Try bins from largest to smallest
       for (const binSize of binSizes) {
-        // Check if any item can fit dimension-wise into the bin
         const anyItemCanFit = items.some(item => {
           const canFitWithoutRotation =
             (item.width <= binSize.binWidth && item.height <= binSize.binHeight);
@@ -476,7 +465,6 @@ document.addEventListener('DOMContentLoaded', function() {
     });
   }
 
-  // Event Listeners:
   const addBinSizeButton = document.getElementById('addBinSize');
   addBinSizeButton.addEventListener('click', function() {
     const binSizesDiv = document.getElementById('binSizes');
