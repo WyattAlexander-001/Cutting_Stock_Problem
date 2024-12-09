@@ -1,7 +1,5 @@
 // Guillotine.js
 
-alert('Guillotine.js loaded');
-
 class Item {
   constructor(width, height) {
     this.originalWidth = width; // Store original dimensions
@@ -221,12 +219,12 @@ class Guillotine {
   rectangleMerge() {
     // Optional optimization to merge adjacent free rectangles
     let didMerge;
+    let mergeAttempts = 0; // Limit the number of merge attempts to prevent infinite loops
     do {
       didMerge = false;
       outer: for (let i = 0; i < this.freeRectangles.length; i++) {
         const rect1 = this.freeRectangles[i];
-        for (let j = 0; j < this.freeRectangles.length; j++) {
-          if (i === j) continue;
+        for (let j = i + 1; j < this.freeRectangles.length; j++) {
           const rect2 = this.freeRectangles[j];
           // Check if rectangles are adjacent and can be merged
           if (rect1.x === rect2.x && rect1.width === rect2.width) {
@@ -268,7 +266,8 @@ class Guillotine {
           }
         }
       }
-    } while (didMerge);
+      mergeAttempts++;
+    } while (didMerge && mergeAttempts < 1000); // Prevent infinite loop
   }
 
   findBestScore(item) {
@@ -332,192 +331,20 @@ class Guillotine {
   }
 
   binStats() {
-    const usedArea = this.items.reduce((acc, item) => acc + item.area, 0);
+    const itemsArea = this.items.reduce((acc, item) => acc + item.area, 0);
     const totalArea = this.binWidth * this.binHeight;
-
-    // Calculate blade area
-    const bladeArea = this.calculateBladeArea();
-
-    const efficiency = (usedArea + bladeArea) / totalArea;
-    const wasteArea = totalArea - usedArea - bladeArea;
-    const wastePercentage = ((wasteArea / totalArea) * 100).toFixed(2);
-    const efficiencyPercentage = ((efficiency) * 100).toFixed(2);
+    const wasteArea = totalArea - itemsArea;
 
     return {
       width: this.binWidth,
       height: this.binHeight,
       area: totalArea,
-      efficiency,
-      efficiencyPercentage,
+      itemsArea,
       wasteArea,
-      wastePercentage,
       items: this.items,
     };
   }
-
-  calculateBladeArea() {
-    // Estimate blade area based on the cuts made
-    const blade = this.bladeThickness;
-    let totalBladeLength = 0;
-
-    // Keep track of cuts made to avoid double-counting
-    const cuts = new Set();
-
-    for (let item of this.items) {
-      // Right cut
-      if (item.x + item.width + blade <= this.binWidth) {
-        const key = `V:${item.x + item.width}:${item.y}:${item.y + item.height}`;
-        if (!cuts.has(key)) {
-          cuts.add(key);
-          totalBladeLength += item.height;
-        }
-      }
-
-      // Bottom cut
-      if (item.y + item.height + blade <= this.binHeight) {
-        const key = `H:${item.y + item.height}:${item.x}:${item.x + item.width}`;
-        if (!cuts.has(key)) {
-          cuts.add(key);
-          totalBladeLength += item.width;
-        }
-      }
-    }
-
-    // Calculate blade area (kerf)
-    return totalBladeLength * blade;
-  }
 }
-
-// Event Listeners:
-
-// Add event listener to "Add Bin Size" button
-const addBinSizeButton = document.getElementById('addBinSize');
-addBinSizeButton.addEventListener('click', function() {
-  const binSizesDiv = document.getElementById('binSizes');
-  const newBinSizeDiv = document.createElement('div');
-  newBinSizeDiv.className = 'bin-size';
-  newBinSizeDiv.innerHTML = `
-    <label>Bin Width:</label>
-    <input type="number" class="binWidth" value="10" min="1">
-    <label>Bin Height:</label>
-    <input type="number" class="binHeight" value="10" min="1">
-    <button class="removeBinSize">Remove</button>
-  `;
-  binSizesDiv.appendChild(newBinSizeDiv);
-
-  // Add event listener for the remove button
-  const removeButton = newBinSizeDiv.querySelector('.removeBinSize');
-  removeButton.addEventListener('click', function() {
-    binSizesDiv.removeChild(newBinSizeDiv);
-  });
-});
-
-// Add event listeners to existing remove buttons
-document.querySelectorAll('.removeBinSize').forEach(button => {
-  button.addEventListener('click', function() {
-    const binSizeDiv = this.parentElement;
-    binSizeDiv.parentElement.removeChild(binSizeDiv);
-  });
-});
-
-const addItemButton = document.getElementById('addItemButton');
-addItemButton.addEventListener('click', function() {
-  const itemList = document.getElementById('itemList');
-  const newItemDiv = document.createElement('div');
-  newItemDiv.className = 'item-entry';
-  newItemDiv.innerHTML = `
-    <label>Width:</label>
-    <input type="number" class="itemWidth" min="0.1" step="0.1">
-    <label>Height:</label>
-    <input type="number" class="itemHeight" min="0.1" step="0.1">
-    <label>Quantity:</label>
-    <input type="number" class="itemQuantity" value="1" min="1">
-    <button class="removeItemButton">Remove</button>
-  `;
-  itemList.appendChild(newItemDiv);
-
-  // Add event listener for the remove button
-  const removeButton = newItemDiv.querySelector('.removeItemButton');
-  removeButton.addEventListener('click', function() {
-    itemList.removeChild(newItemDiv);
-  });
-});
-
-const loadButton = document.getElementById('loadButton');
-const fileInput = document.getElementById('fileInput');
-
-loadButton.addEventListener('click', function () {
-  const file = fileInput.files[0];
-  if (file) {
-    // Handle file input
-    const reader = new FileReader();
-
-    reader.onload = function (e) {
-      try {
-        const jsonData = JSON.parse(e.target.result);
-        processItemData(jsonData);
-      } catch (error) {
-        alert('Error parsing JSON file: ' + error.message);
-      }
-    };
-
-    reader.readAsText(file);
-  } else {
-    // No file selected, process manual items
-    const jsonData = [];
-
-    const itemEntries = document.querySelectorAll('.item-entry');
-    itemEntries.forEach(entry => {
-      const width = parseFloat(entry.querySelector('.itemWidth').value);
-      const height = parseFloat(entry.querySelector('.itemHeight').value);
-      const quantity = parseInt(entry.querySelector('.itemQuantity').value) || 1;
-
-      if (width && height) {
-        jsonData.push({ width, height, quantity });
-      }
-    });
-
-    if (jsonData.length === 0) {
-      alert('Please enter items manually or select a JSON file.');
-      return;
-    }
-
-    processItemData(jsonData);
-  }
-});
-
-const saveToJsonButton = document.getElementById('saveToJsonButton');
-saveToJsonButton.addEventListener('click', function() {
-  const jsonData = [];
-
-  const itemEntries = document.querySelectorAll('.item-entry');
-  itemEntries.forEach(entry => {
-    const width = parseFloat(entry.querySelector('.itemWidth').value);
-    const height = parseFloat(entry.querySelector('.itemHeight').value);
-    const quantity = parseInt(entry.querySelector('.itemQuantity').value) || 1;
-
-    if (width && height) {
-      jsonData.push({ width, height, quantity });
-    }
-  });
-
-  if (jsonData.length === 0) {
-    alert('No items to save.');
-    return;
-  }
-
-  const jsonString = JSON.stringify(jsonData, null, 2);
-  const blob = new Blob([jsonString], { type: 'application/json' });
-  const url = URL.createObjectURL(blob);
-
-  const link = document.createElement('a');
-  link.href = url;
-  link.download = 'items.json';
-  link.click();
-
-  // Optionally, revoke the object URL after download
-  URL.revokeObjectURL(url);
-});
 
 // Expose the classes to the global scope
 window.Item = Item;

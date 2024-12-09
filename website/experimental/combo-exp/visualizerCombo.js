@@ -1,11 +1,13 @@
-// visualizerShelf.js
+// visualizerCombo.js
 
 const SCALE = 50; // Adjust this value as needed
 let bladeThickness = 0; // Default blade thickness
+let allowRotation = true; // Set rotation preference
 
 document.addEventListener('DOMContentLoaded', function() {
-  // Reference to the bin container div
-  const binContainer = document.getElementById('binContainer');
+  // Reference to the bin container divs
+  const shelfBinContainer = document.getElementById('shelfBinContainer');
+  const guillotineBinContainer = document.getElementById('guillotineBinContainer');
 
   // Function to process item data
   function processItemData(data) {
@@ -16,7 +18,7 @@ document.addEventListener('DOMContentLoaded', function() {
       const binWidth = parseFloat(div.querySelector('.binWidth').value);
       const binHeight = parseFloat(div.querySelector('.binHeight').value);
       if (binWidth && binHeight) {
-        binSizes.push({ binWidth, binHeight });
+        binSizes.push({ binWidth, binHeight, area: binWidth * binHeight });
       }
     });
 
@@ -42,11 +44,20 @@ document.addEventListener('DOMContentLoaded', function() {
       }
     });
 
+    // Clear previous bin visuals
+    shelfBinContainer.innerHTML = '';
+    guillotineBinContainer.innerHTML = '';
+
+    // Process items with Shelf Algorithm
+    processShelfAlgorithm(items.slice(), binSizes, shelfBinContainer);
+
+    // Process items with Guillotine Algorithm
+    processGuillotineAlgorithm(items.slice(), binSizes, guillotineBinContainer);
+  }
+
+  function processShelfAlgorithm(items, binSizes, binContainer) {
     // Sort items by height descending (could adjust this)
     items.sort((a, b) => b.height - a.height);
-
-    // Clear previous bin visuals
-    binContainer.innerHTML = '';
 
     // Initialize total areas
     let totalItemsArea = 0;
@@ -63,7 +74,7 @@ document.addEventListener('DOMContentLoaded', function() {
           binWidth: binSize.binWidth,
           binHeight: binSize.binHeight,
           bladeThickness: bladeThickness,
-          allowRotation: true,
+          allowRotation: allowRotation,
         });
 
         const remainingItems = [];
@@ -91,7 +102,7 @@ document.addEventListener('DOMContentLoaded', function() {
       }
 
       if (!bestBinResult || bestBinResult.numItemsPacked === 0) {
-        alert('Some items could not be placed in any bin.');
+        alert('Some items could not be placed in any bin using Shelf Algorithm.');
         break;
       }
 
@@ -100,7 +111,7 @@ document.addEventListener('DOMContentLoaded', function() {
         binWidth: bestBinResult.binSize.binWidth,
         binHeight: bestBinResult.binSize.binHeight,
         bladeThickness: bladeThickness,
-        allowRotation: true,
+        allowRotation: allowRotation,
       });
 
       const remainingItems = [];
@@ -136,8 +147,134 @@ document.addEventListener('DOMContentLoaded', function() {
 
     // Display final tally
     const finalTallyDiv = document.createElement('div');
-    finalTallyDiv.innerHTML = `<h2>Final Tally</h2>
+    finalTallyDiv.innerHTML = `<h2>Final Tally for Shelf Algorithm</h2>
     Total Rectangles Area: ${totalItemsArea.toFixed(2)}<br>
+    Total Waste Area: ${totalWasteArea.toFixed(2)}`;
+    binContainer.appendChild(finalTallyDiv);
+  }
+
+  function processGuillotineAlgorithm(items, binSizes, binContainer) {
+    // Sort binSizes by area descending
+    binSizes.sort((a, b) => b.area - a.area);
+
+    // Sort items in decreasing order of area (or any other heuristic)
+    items.sort((a, b) => b.area - a.area);
+
+    // Initialize total areas
+    let totalItemsArea = items.reduce((acc, item) => acc + item.area, 0);
+    let totalWasteArea = 0;
+
+    const binsUsed = [];
+
+    while (items.length > 0) {
+      // Recalculate totalItemsArea
+      totalItemsArea = items.reduce((acc, item) => acc + item.area, 0);
+
+      let bestBinResult = null;
+
+      // Try bins from largest to smallest
+      for (const binSize of binSizes) {
+        // Check if any item can fit dimension-wise into the bin
+        const anyItemCanFit = items.some(item => {
+          const canFitWithoutRotation =
+            (item.width <= binSize.binWidth && item.height <= binSize.binHeight);
+          const canFitWithRotation =
+            (item.height <= binSize.binWidth && item.width <= binSize.binHeight);
+          return canFitWithoutRotation || (allowRotation && canFitWithRotation);
+        });
+
+        if (!anyItemCanFit) {
+          continue;
+        }
+
+        // Create a new bin with the current bin size
+        const tempBin = new GuillotineBin({
+          binWidth: binSize.binWidth,
+          binHeight: binSize.binHeight,
+          bladeThickness: bladeThickness,
+          allowRotation: allowRotation,
+          heuristic: 'best_shortside',
+          rectangleMerge: true,
+          splitHeuristic: 'default',
+        });
+
+        // Keep track of which items are packed
+        const packedItemIndices = [];
+
+        for (let index = 0; index < items.length; index++) {
+          const item = items[index];
+          const tempItem = new Item(item.width, item.height);
+          if (tempBin.insert(tempItem)) {
+            packedItemIndices.push(index);
+          }
+        }
+
+        const numItemsPacked = packedItemIndices.length;
+        const wasteArea = tempBin.binStats().wasteArea;
+
+        // Check if this bin size packs more items than previous best
+        if (!bestBinResult || numItemsPacked > bestBinResult.numItemsPacked ||
+            (numItemsPacked === bestBinResult.numItemsPacked && wasteArea < bestBinResult.wasteArea)) {
+          bestBinResult = {
+            binSize: binSize,
+            bin: tempBin,
+            numItemsPacked: numItemsPacked,
+            wasteArea: wasteArea,
+            packedItemIndices: packedItemIndices,
+          };
+        }
+      }
+
+      if (!bestBinResult) {
+        alert('Some items cannot fit into any of the provided bin sizes using Guillotine Algorithm.');
+        break;
+      }
+
+      // Now, create the actual bin and pack the items
+      const selectedBin = new GuillotineBin({
+        binWidth: bestBinResult.binSize.binWidth,
+        binHeight: bestBinResult.binSize.binHeight,
+        bladeThickness: bladeThickness,
+        allowRotation: allowRotation,
+        heuristic: 'best_shortside',
+        rectangleMerge: true,
+        splitHeuristic: 'default',
+      });
+
+      const remainingItems = [];
+      const packedItems = [];
+
+      // Reset items to original dimensions before inserting
+      items.forEach(item => item.reset());
+
+      for (let index = 0; index < items.length; index++) {
+        const item = items[index];
+        if (bestBinResult.packedItemIndices.includes(index)) {
+          selectedBin.insert(item);
+          packedItems.push(item);
+        } else {
+          remainingItems.push(item);
+        }
+      }
+
+      const binStats = selectedBin.binStats();
+      binsUsed.push({ bin: selectedBin, binSize: bestBinResult.binSize, binStats });
+
+      // Accumulate areas
+      totalWasteArea += binStats.wasteArea;
+
+      // Update items list
+      items = remainingItems;
+    }
+
+    // Display bins used
+    displayBins(binsUsed, binContainer);
+
+    // Display final tally
+    const finalTallyDiv = document.createElement('div');
+    const totalRectanglesArea = binsUsed.reduce((acc, binData) => acc + binData.binStats.itemsArea, 0);
+    finalTallyDiv.innerHTML = `<h2>Final Tally for Guillotine Algorithm</h2>
+    Total Rectangles Area: ${totalRectanglesArea.toFixed(2)}<br>
     Total Waste Area: ${totalWasteArea.toFixed(2)}`;
     binContainer.appendChild(finalTallyDiv);
   }
@@ -240,6 +377,113 @@ document.addEventListener('DOMContentLoaded', function() {
     binContainerDiv.appendChild(binDiv);
 
     return binContainerDiv;
+  }
+
+  // Function to display bins for Guillotine Algorithm
+  function displayBins(bins, binContainer) {
+    bins.forEach((binData, index) => {
+      const bin = binData.bin;
+      const binSize = binData.binSize;
+      const binStats = bin.binStats();
+
+      // Create a container for the bin visualization
+      const binDiv = document.createElement('div');
+      binDiv.className = 'bin-container';
+      binDiv.style.marginBottom = '20px';
+
+      const binTitle = document.createElement('div');
+      binTitle.innerHTML = `<strong>Bin ${index + 1}</strong><br>
+      Total Rectangles Area: ${binStats.itemsArea.toFixed(2)}<br>
+      Waste Area: ${binStats.wasteArea.toFixed(2)}`;
+
+      binDiv.appendChild(binTitle);
+
+      // Create a canvas for each bin
+      const binCanvas = document.createElement('div');
+      binCanvas.className = 'bin';
+      binCanvas.style.width = `${bin.binWidth * SCALE}px`;
+      binCanvas.style.height = `${bin.binHeight * SCALE}px`;
+      binCanvas.style.position = 'relative';
+      binCanvas.style.border = '1px solid black';
+      binCanvas.style.margin = '10px 0';
+      binCanvas.style.backgroundColor = 'red'; // Waste area is red
+      binCanvas.style.overflow = 'hidden'; // Prevent items from extending beyond the bin
+
+      // Add dimensions inside the bin
+      const dimensionsDiv = document.createElement('div');
+      dimensionsDiv.style.position = 'absolute';
+      dimensionsDiv.style.bottom = '5px';
+      dimensionsDiv.style.right = '5px';
+      dimensionsDiv.style.backgroundColor = 'rgba(255, 255, 255, 0.7)';
+      dimensionsDiv.style.padding = '2px 4px';
+      dimensionsDiv.style.fontSize = '14px'; // Increased font size
+      dimensionsDiv.innerHTML = `${bin.binWidth} x ${bin.binHeight}`;
+      binCanvas.appendChild(dimensionsDiv);
+
+      // Add items
+      bin.items.forEach(item => {
+        const itemDiv = document.createElement('div');
+        itemDiv.className = 'item';
+        itemDiv.style.width = `${item.width * SCALE}px`;
+        itemDiv.style.height = `${item.height * SCALE}px`;
+        itemDiv.style.backgroundColor = 'green'; // Used wood is green
+        itemDiv.style.position = 'absolute';
+        itemDiv.style.left = `${item.x * SCALE}px`;
+        itemDiv.style.top = `${item.y * SCALE}px`;
+        itemDiv.style.boxSizing = 'border-box';
+
+        if (bladeThickness > 0) {
+          // Determine which shadows to apply based on item's position
+          const shadows = [];
+
+          const bladePx = bladeThickness * SCALE;
+
+          // If item is not at the top edge of the bin, apply top shadow
+          if (item.y > 0) {
+            shadows.push(`inset 0 ${bladePx}px 0 -${bladePx}px black`);
+          }
+
+          // If item is not at the bottom edge of the bin, apply bottom shadow
+          if (item.y + item.height + bladeThickness < bin.binHeight) {
+            shadows.push(`inset 0 -${bladePx}px 0 -${bladePx}px black`);
+          }
+
+          // If item is not at the left edge of the bin, apply left shadow
+          if (item.x > 0) {
+            shadows.push(`inset ${bladePx}px 0 0 -${bladePx}px black`);
+          }
+
+          // If item is not at the right edge of the bin, apply right shadow
+          if (item.x + item.width + bladeThickness < bin.binWidth) {
+            shadows.push(`inset -${bladePx}px 0 0 -${bladePx}px black`);
+          }
+
+          // Apply the box-shadow styles
+          itemDiv.style.boxShadow = shadows.join(', ');
+        } else {
+          // No blade thickness, so no shadows
+          itemDiv.style.boxShadow = 'none';
+        }
+
+        // Add dimensions inside the item
+        const itemDimensionsDiv = document.createElement('div');
+        itemDimensionsDiv.style.position = 'absolute';
+        itemDimensionsDiv.style.bottom = '2px';
+        itemDimensionsDiv.style.right = '2px';
+        itemDimensionsDiv.style.backgroundColor = 'rgba(255, 255, 255, 0.7)';
+        itemDimensionsDiv.style.padding = '1px 2px';
+        itemDimensionsDiv.style.fontSize = '12px'; // Increased font size
+        itemDimensionsDiv.style.textAlign = 'right';
+        itemDimensionsDiv.style.pointerEvents = 'none';
+        itemDimensionsDiv.innerHTML = `${item.originalWidth} x ${item.originalHeight}`;
+
+        itemDiv.appendChild(itemDimensionsDiv);
+        binCanvas.appendChild(itemDiv);
+      });
+
+      binDiv.appendChild(binCanvas);
+      binContainer.appendChild(binDiv);
+    });
   }
 
   // Event Listeners:

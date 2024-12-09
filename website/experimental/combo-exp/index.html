@@ -2,11 +2,11 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>2D Bin Packing Combo Visualization</title>
-  <link rel="stylesheet" href="styles.css">
+  <title>Bin Packing Visualization - Guillotine and Shelf Algorithms</title>
+  <!-- <link rel="stylesheet" href="styles.css"> -->
 </head>
 <body>
-  <h1>2D Bin Packing Combo Visualization</h1>
+  <h1>Bin Packing Visualization - Guillotine and Shelf Algorithms</h1>
 
   <h2>Bin Sizes</h2>
   <div id="binSizes">
@@ -16,6 +16,13 @@
       <input type="number" class="binWidth" value="8" min="1">
       <label>Bin Height:</label>
       <input type="number" class="binHeight" value="10" min="1">
+      <button class="removeBinSize">Remove</button>
+    </div>
+    <div class="bin-size">
+      <label>Bin Width:</label>
+      <input type="number" class="binWidth" value="10" min="1">
+      <label>Bin Height:</label>
+      <input type="number" class="binHeight" value="14" min="1">
       <button class="removeBinSize">Remove</button>
     </div>
   </div>
@@ -32,9 +39,7 @@
     <button id="loadButton">Load Items</button>
   </div>
 
-  <!-- Container to display the bins -->
-  <div id="binContainer"></div>
-
+  <!-- Items input -->
   <h2>Items</h2>
   <div id="itemList">
     <!-- Item inputs will be added here -->
@@ -42,10 +47,15 @@
   <button id="addItemButton">Add Item</button>
   <button id="saveToJsonButton">Save Items to JSON</button>
 
-  <!-- Include scripts in the correct order -->
-  <script src="Item.js"></script>
-  <script src="Shelf.js"></script>
-  <script src="Guillotine.js"></script>
-  <script src="main.js"></script>
+  <!-- Shelf Algorithm Visualization -->
+  <h2>Shelf Algorithm Visualization</h2>
+  <div id="shelfBinContainer"></div>
+
+  <!-- Guillotine Algorithm Visualization -->
+  <h2>Guillotine Algorithm Visualization</h2>
+  <div id="guillotineBinContainer"></div>
+
+  <script src="Combo.js"></script>
+  <script src="visualizerCombo.js"></script>
 </body>
 </html>

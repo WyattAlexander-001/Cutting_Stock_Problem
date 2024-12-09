@@ -136,6 +136,8 @@ Sorting speed increase is 500% increase
 
 ![Speed Increase](website/README_images/SortingSpeedIncrease.png)
 
+I didn't know where to put this but here's where I got the cute icon(https://www.freepik.com/icon/circular-saw_2766057#fromView=search&page=6&position=74&uuid=c6a13b56-118a-4e61-977a-93050731615f)
+
 ‌
 
 

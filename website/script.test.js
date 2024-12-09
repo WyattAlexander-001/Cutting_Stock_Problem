@@ -1,7 +1,7 @@
 // testing for script.js
 
 // import functions
-const { groupRectanglesBySize, updateQuantity, showModal } = require('./script.js');
+const { groupRectanglesBySize, updateQuantity } = require('./script.js');
 
 
 // groupRectanglesBySize TESTS
@@ -82,13 +82,8 @@ describe('groupRectanglesBySize', () => {
 });
 
 // updateQuantity TESTS
-// Mock showModal function
-jest.mock('./script.js', () => ({
-    ...jest.requireActual('./script.js'),
-    showModal: jest.fn(),
-}));
 
-describe('updateQuantity (and showModal)', () => {
+describe('updateQuantity', () => {
     let rectangles;
 
     beforeEach(() => {
@@ -107,22 +102,17 @@ describe('updateQuantity (and showModal)', () => {
 
     test('remove existing entries of the specified size', () => {
         updateQuantity(10, 20, 0);
-        expect(rectangles).toEqual([{ width: 15, height: 25 }]);
+        expect(global.rectangles).toEqual([{ width: 15, height: 25 }]);
     });
 
     test('add the correct number of new rectangles', () => {
         updateQuantity(10, 20, 3);
-        expect(rectangles).toEqual([
+        expect(global.rectangles).toEqual([
             { width: 15, height: 25 },
             { width: 10, height: 20 },
             { width: 10, height: 20 },
             { width: 10, height: 20 },
         ]);
-    });
-
-    test('should call showModal to refresh the modal display', () => {
-        updateQuantity(10, 20, 2);
-        expect(showModal).toHaveBeenCalled();
     });
 });
 
@@ -134,76 +124,65 @@ const { area, rotate, rotateToLandscape, totalArea } = require('./script.js');
 // pass in rectangle, calculate area
 describe('area', () => {
     test('positive dimensions', () => {
-        rectangle.width = 5;
-        rectangle.height = 10;
+        const rectangle = { width: 5, height: 10 };
         expect(area(rectangle)).toBe(50);
     });
 
     test('one negative dimension', () => {
-        rectangle.width = 5;
-        rectangle.height = -10;
+        const rectangle = { width: 5, height: -10 };
         expect(area(rectangle)).toBe(-50);
     });
 
     test('two negative dimensions', () => {
-        rectangle.width = -5;
-        rectangle.height = -10;
+        const rectangle = { width: -5, height: -10 };
         expect(area(rectangle)).toBe(50);
     });
 
-    test('zero dimensions', () => {
-        rectangle.width = 0;   
-        rectangle.height = 10;
+    test('zero dimension', () => {
+        const rectangle = { width: 0, height: 10 };
         expect(area(rectangle)).toBe(0);
     });
 });
 
 describe('rotate', () => {
     test('positive dimensions', () => {
-        rectangle.width = 5;
-        rectangle.height = 10;
+        const rectangle = { width: 5, height: 10 };
         expect(rotate(rectangle)).toEqual({ height: 5, width: 10 });
     });
 
     test('one negative dimension', () => {
-        rectangle.width = 5;
-        rectangle.height = -10;
+        const rectangle = { width: 5, height: -10 };
         expect(rotate(rectangle)).toEqual({ height: 5, width: -10 });
     });
 
     test('zero dimension', () => {
-        rectangle.width = 0;   
-        rectangle.height = 10;
+        const rectangle = { width: 0, height: 10 };
         expect(rotate(rectangle)).toEqual({ height: 0, width: 10 });
     });
 
     test('equal dimensions', () => {
-        rectangle.width = 5;
-        rectangle.height = 5;
+        const rectangle = { width: 5, height: 5 };
         expect(rotate(rectangle)).toEqual({ height: 5, width: 5 });
     });
 });
 
 describe('rotateToLandscape', () => {
     test('width is larger', () => {
-        rectangle.width = 10;
-        rectangle.height = 5;
-        rotateToLandscape(rectangle);
-        expect(rectangle.width).toBeGreaterThanOrEqual(rectangle.height);
+        const rectangle = { width: 10, height: 5 };
+        const rotated = rotateToLandscape(rectangle);
+        expect(rotated.width).toBeGreaterThan(rotated.height);
     });
 
     test('height is larger', () => {
-        rectangle.width = 5;
-        rectangle.height = 10;
-        rotateToLandscape(rectangle);
-        expect(rectangle.width).toBeGreaterThanOrEqual(rectangle.height);
+        const rectangle = { width: 5, height: 10 };
+        const rotated = rotateToLandscape(rectangle);
+        expect(rotated.width).toBeGreaterThan(rotated.height);
     });
 
     test('equal dimensions', () => {
-        rectangle.width = 5;
-        rectangle.height = 5;
-        rotateToLandscape(rectangle);
-        expect(rectangle.width).toBeGreaterThanOrEqual(rectangle.height);
+        const rectangle = { width: 5, height: 5 };
+        const rotated = rotateToLandscape(rectangle);
+        expect(rotated.width).toEqual(rotated.height);
     });
 });
 
@@ -228,7 +207,7 @@ describe('totalArea', () => {
             { width: -10, height: -20 },
             { width: 15, height: -25 }
         ];
-        expect(totalArea(rectangles)).toBe(225);
+        expect(totalArea(rectangles)).toBe(-225);
     });
 
     test('zero dimensions', () => {

@@ -12,6 +12,8 @@ document.getElementById = jest.fn().mockReturnValue({
     removeEventListener: jest.fn() // Optionally, add removeEventListener as well
 });
 
+document.getElementById('modalList').appendChild = jest.fn();
+
 // Mock window.onclick
 Object.defineProperty(window, 'onclick', {
     value: null,

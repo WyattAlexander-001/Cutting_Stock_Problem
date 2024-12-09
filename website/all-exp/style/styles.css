@@ -1,0 +1,626 @@
+/* General Styles */
+body {
+    background-color: #fff8dc; /* Cornsilk for a warm, earthy feel */
+    font-family: 'Poppins', sans-serif; /* Modern, friendly font */
+    color: #333;
+    margin: 0;
+    padding: 0;
+}
+
+footer {
+    margin-top: 40px;
+}
+
+footer h2 {
+    margin-bottom: 10px;
+}
+
+.references {
+    list-style-type: decimal;
+    margin-left: 20px;
+}
+
+.references li {
+    margin-bottom: 15px;
+    text-align: justify;
+}
+
+.references li em {
+    font-style: italic;
+}
+
+.references a {
+    color: #556B2F; /* Dark Olive Green for earthy links */
+    text-decoration: none;
+}
+
+.references a:hover {
+    text-decoration: underline;
+}
+
+/* Modal Popup */
+.modal {
+    display: none;
+    position: fixed;
+    z-index: 1;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    overflow: auto;
+    background-color: rgba(0,0,0,0.4);
+}
+
+.modal-content {
+    background-color: #fefefe;
+    margin: 15% auto;
+    padding: 20px;
+    border: 1px solid #888;
+    width: 80%;
+}
+
+.close {
+    color: #aaa;
+    float: right;
+    font-size: 28px;
+    font-weight: bold;
+}
+
+.close:hover,
+.close:focus {
+    color: black;
+    text-decoration: none;
+    cursor: pointer;
+}
+
+.modal-entry {
+    margin-bottom: 10px;
+    padding: 5px;
+    border-bottom: 1px solid #ccc;
+}
+
+.modal-entry span {
+    margin-right: 15px;
+}
+
+.modal-entry input {
+    width: 50px;
+}
+
+.modal-entry button {
+    margin-left: 10px;
+}
+
+/* 1D Cutting Stock Visualization */
+
+/* Container for the entire visualization */
+.visualization-container {
+    display: flex;
+    flex-direction: row; /* Arrange planks horizontally */
+    align-items: flex-end;
+    margin-top: 20px;
+    overflow-x: auto; /* Allows horizontal scrolling if necessary */
+    padding: 20px;
+    /* background-color: #fafafa; */
+    /* border: 1px solid #ddd; */
+}
+
+/* Container for each individual plank and its label */
+.plank-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    margin: 0 10px; /* Horizontal spacing between planks */
+}
+
+/* Representation of a single plank */
+.plank {
+    width: 50px;
+    background-color: #f0f0f0;
+    position: relative;
+    border: 1px solid #999;
+    box-shadow: 2px 2px 5px rgba(0,0,0,0.1);
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-end; /* Cuts grow upwards */
+}
+
+/* Single dark green cut line */
+.cut-line {
+    width: 100%;
+    height: 2px; /* Thickness of the cut line */
+    background-color: #006400; /* Dark green color */
+}
+
+/* Labels inside each cut section */
+.cut-label {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    font-size: 10px;
+    color: #000;
+    pointer-events: none; /* Allows clicks to pass through labels */
+}
+
+/* Label for the plank's total length */
+.length-label {
+    margin-top: 5px;
+    font-weight: bold;
+    font-size: 14px;
+    color: #333;
+}
+
+/*STYLE STUFF BELOW HERE KEEP ABOVE UNTOUCHED!!!!*/
+
+/* ================================
+   Updated Styles: Earthy & Accessible Design
+   ================================ */
+
+/* Reset and Base Styles */
+*,
+*::before,
+*::after {
+    box-sizing: border-box;
+}
+
+/* Container Layout */
+.container {
+    display: grid;
+    grid-template-rows: auto 1fr auto auto; /* Added auto for references section */
+    min-height: 100vh;
+}
+
+/* Header Styles */
+header {
+    background-color: #6B8E23; /* Olive Drab for an earthy header */
+    color: #fff;
+    padding: 15px 20px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    position: sticky;
+    top: 0;
+    z-index: 1000;
+}
+
+.logo {
+    display: flex;
+    align-items: center;
+    text-decoration: none;
+    color: #fff;
+}
+
+.logo img {
+    width: 60px;
+    height: 60px;
+    margin-right: 10px;
+}
+
+.logo h1 {
+    font-size: 1.5rem;
+    margin: 0;
+}
+
+/* Navigation Styles */
+nav {
+    width: 100%;
+    margin-top: 10px;
+}
+
+.nav-menu {
+    list-style: none;
+    display: flex;
+    justify-content: center;
+    gap: 20px;
+    flex-wrap: wrap;
+}
+
+.nav-menu li {
+    position: relative;
+}
+
+.nav-menu a {
+    color: #fff;
+    text-decoration: none;
+    font-weight: 600;
+    padding: 8px 12px;
+    border-radius: 5px;
+    transition: background-color 0.3s, transform 0.3s;
+}
+
+.nav-menu a:hover {
+    background-color: rgba(255, 255, 255, 0.2);
+    transform: scale(1.05);
+}
+
+/* Hamburger Menu for Mobile */
+.hamburger {
+    display: none;
+    font-size: 2rem;
+    cursor: pointer;
+}
+
+#nav-toggle {
+    display: none;
+}
+
+@media (max-width: 768px) {
+    .nav-menu {
+        flex-direction: column;
+        align-items: center;
+        background-color: #6B8E23; /* Match header background */
+        position: absolute;
+        top: 100%;
+        left: 0;
+        right: 0;
+        display: none;
+    }
+
+    .nav-menu.active {
+        display: flex;
+    }
+
+    .hamburger {
+        display: block;
+        position: absolute;
+        top: 15px;
+        right: 20px;
+        color: #fff;
+    }
+}
+
+/* Main Content Styles */
+main.grid-container {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 20px;
+    padding: 20px;
+}
+
+@media (min-width: 768px) {
+    main.grid-container {
+        grid-template-columns: 1fr 1fr;
+    }
+}
+
+/* Section Styles */
+section {
+    background-color: #fff;
+    border: 2px solid #6B8E23; /* Match header for consistency */
+    border-radius: 10px;
+    padding: 20px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+section h2 {
+    color: #6B8E23; /* Earthy green for headings */
+    margin-bottom: 15px;
+    font-size: 1.3rem;
+}
+
+section p,
+section ol,
+section ul {
+    margin-bottom: 15px;
+    line-height: 1.6;
+}
+
+section a {
+    color: #556B2F; /* Dark Olive Green for links */
+    text-decoration: none;
+    transition: color 0.3s;
+}
+
+section a:hover {
+    color: #6B8E23;
+    text-decoration: underline;
+}
+
+/* Form Styles */
+form {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
+
+form label {
+    font-weight: 600;
+    margin-bottom: 5px;
+}
+
+form input[type="text"],
+form input[type="number"],
+form input[type="file"],
+form button {
+    padding: 10px;
+    border: 2px solid #6B8E23; /* Earthy border color */
+    border-radius: 5px;
+    font-size: 1rem;
+    transition: border-color 0.3s, transform 0.3s;
+}
+
+form input[type="text"]:focus,
+form input[type="number"]:focus {
+    border-color: #556B2F; /* Darker green on focus */
+    outline: none;
+    transform: scale(1.02);
+}
+
+form button {
+    background-color: #6B8E23; /* Earthy button color */
+    color: #fff;
+    border: none;
+    cursor: pointer;
+    font-weight: 600;
+    transition: background-color 0.3s, transform 0.3s;
+}
+
+form button:hover {
+    background-color: #556B2F; /* Darker green on hover */
+    transform: scale(1.05);
+}
+
+/* Buttons */
+.btn {
+    background-color: #6B8E23; /* Earthy button color */
+    color: #fff;
+    border: none;
+    padding: 10px 15px;
+    border-radius: 5px;
+    cursor: pointer;
+    font-weight: 600;
+    transition: background-color 0.3s, transform 0.3s;
+}
+
+.btn:hover {
+    background-color: #556B2F; /* Darker green on hover */
+    transform: scale(1.05);
+}
+
+.btn.primary {
+    background-color: #8B4513; /* Saddle Brown for primary buttons */
+}
+
+.btn.primary:hover {
+    background-color: #A0522D; /* Sienna on hover */
+}
+
+/* Desired Cuts & Bin Sizes */
+.desired-cut,
+.bin-size {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+@media (min-width: 500px) {
+    .desired-cut,
+    .bin-size {
+        flex-direction: row;
+        align-items: center;
+    }
+
+    .desired-cut label,
+    .bin-size label {
+        flex: 1;
+    }
+
+    .desired-cut input,
+    .bin-size input {
+        flex: 2;
+    }
+
+    .removeCut,
+    .removeBinSize {
+        margin-top: 0;
+    }
+}
+
+/* Remove Buttons */
+.removeCut,
+.removeBinSize {
+    background-color: #8B0000; /* Dark Red for remove buttons */
+    color: #fff;
+    border: none;
+    padding: 8px 12px;
+    border-radius: 5px;
+    cursor: pointer;
+    font-weight: 600;
+    transition: background-color 0.3s, transform 0.3s;
+}
+
+.removeCut:hover,
+.removeBinSize:hover {
+    background-color: #A52A2A; /* Brownish red on hover */
+    transform: scale(1.05);
+}
+
+/* Visualization Containers */
+.visualization-container,
+#shelfBinContainer,
+#guillotineBinContainer {
+    background-color: #f5f5dc; /* Beige for visualization areas */
+    border: 2px dashed #6B8E23; /* Earthy dashed border */
+    padding: 20px;
+    border-radius: 10px;
+    min-height: 200px;
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    align-items: flex-end;
+    gap: 15px;
+}
+
+/* Plank Styles */
+.plank-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.plank {
+    width: 60px;
+    height: 150px;
+    background-color: #deb887; /* Burly Wood color for planks */
+    border: 2px solid #8B4513; /* Saddle Brown border */
+    border-radius: 8px;
+    box-shadow: 3px 3px 8px rgba(0,0,0,0.2);
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-end;
+    transition: transform 0.3s;
+}
+
+.plank:hover {
+    transform: scale(1.05);
+}
+
+.cut-line {
+    width: 100%;
+    height: 3px;
+    background-color: #556B2F; /* Dark Olive Green for cut lines */
+}
+
+.cut-label {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    font-size: 0.8rem;
+    color: #000000;
+    text-shadow: 1px 1px 2px rgba(0,0,0,0.5);
+}
+
+.length-label {
+    margin-top: 8px;
+    font-weight: 600;
+    font-size: 1rem;
+    color: #333;
+}
+
+/* Footer Styles */
+footer {
+    background-color: #f5f5dc; /* Beige background for footer */
+    color: #000; /* Black text for readability */
+    padding: 30px 20px;
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 20px;
+    border-top: 4px solid #6B8E23; /* Earthy top border */
+}
+
+@media (min-width: 600px) {
+    footer {
+        grid-template-columns: repeat(2, 1fr); /* Adjusted for better layout */
+    }
+}
+
+footer section h2 {
+    color: #6B8E23; /* Earthy green for footer headings */
+    margin-bottom: 10px;
+    font-size: 1.2rem;
+}
+
+footer a {
+    color: #556B2F; /* Dark Olive Green for footer links */
+    text-decoration: none;
+    transition: color 0.3s;
+}
+
+footer a:hover {
+    color: #6B8E23; /* Slightly lighter green on hover */
+    text-decoration: underline;
+}
+
+footer ul,
+footer ol {
+    list-style: none;
+    padding-left: 0;
+}
+
+footer ul li,
+footer ol li {
+    margin-bottom: 10px;
+}
+
+/* References Section Styles */
+.references-section {
+    background-color: #f5f5dc; /* Beige background for consistency */
+    color: #000; /* Black text for readability */
+    padding: 30px 20px;
+    border-top: 4px solid #6B8E23; /* Earthy top border */
+    max-width: 1200px;
+    margin: 0 auto 40px auto;
+}
+
+.references-section h2 {
+    color: #6B8E23; /* Earthy green for headings */
+    margin-bottom: 20px;
+    font-size: 1.5rem;
+    text-align: center;
+}
+
+.references-section .references {
+    list-style-type: decimal;
+    margin-left: 40px;
+}
+
+.references-section .references li {
+    margin-bottom: 15px;
+    line-height: 1.6;
+}
+
+.references-section .references a {
+    color: #556B2F; /* Dark Olive Green for links */
+    text-decoration: none;
+    transition: color 0.3s;
+}
+
+.references-section .references a:hover {
+    color: #6B8E23; /* Slightly lighter green on hover */
+    text-decoration: underline;
+}
+
+/* About Section Lists */
+.about-section ol,
+.about-section ul {
+    margin-left: 20px;
+}
+
+.about-section a {
+    color: #6B8E23; /* Earthy green for about section links */
+    text-decoration: none;
+    transition: color 0.3s;
+}
+
+.about-section a:hover {
+    color: #556B2F; /* Darker green on hover */
+    text-decoration: underline;
+}
+
+/* Responsive Adjustments */
+@media (max-width: 768px) {
+    main.grid-container {
+        grid-template-columns: 1fr;
+    }
+
+    .desired-cut,
+    .bin-size {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+
+    footer {
+        grid-template-columns: 1fr;
+    }
+
+    .references-section {
+        padding: 20px 10px;
+    }
+
+    .references-section h2 {
+        font-size: 1.3rem;
+    }
+}
