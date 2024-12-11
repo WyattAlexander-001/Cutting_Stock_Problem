@@ -1,9 +1,0 @@
-{
-    "woodLengths": [10, 4, 5, 6, 8, 12],
-    "desiredCuts": [
-        { "size": 3, "quantity": 5 },
-        { "size": 2, "quantity": 6 },
-        { "size": 1, "quantity": 3 }
-    ],
-    "bladeThickness": 0.125
-}
